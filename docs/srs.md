@@ -13,9 +13,10 @@ Vampir Köylü, 5 ile 12 oyuncunun tarayıcıdan oynadığı bir rol oyunudur. O
 | Ad Soyad | Sorumluluk |
 | --- | --- |
 | Figen Arslan | Repo, giriş, kapsam dışı, çekirdek problem, birleştirme |
-| Melek ... | Kullanıcı hikâyeleri |
-| Zeyno ... | İşlevsel gereksinimler |
-| Zeynep ... | İşlevsel olmayan gereksinimler, use-case, yapay zekâ günlüğü |
+| Melek Efe | Kullanıcı hikâyeleri |
+| Zeynep Tunç | İşlevsel gereksinimler |
+| Zeynep Çakmak | İşlevsel olmayan gereksinimler, use-case, yapay zekâ günlüğü |
+
 
 ### 1.4 Oyun kuralları
 
@@ -91,6 +92,28 @@ Kontrol her gece sonuçlandığında ve her oylamadan sonra yapılır.
 - Vampir, yalnızca diğer vampirleri ek olarak görür.
 - Sunucu yanıtında bu istisna dışında başkasının rolü bulunmaz.
 
+## 2. Kapsam dışı
+
+- Oyun içi sohbet yoktur. Tartışma uygulama dışında yapılır.
+- Bot (bilgisayar) oyuncular yoktur.
+- Tuzakçı isteğe bağlı (bonus) roldür, çekirdek oyun tamamlandıktan sonra eklenir.
+
+## 3. Çekirdek problem
+
+### 3.1 Faz durum makinesi
+Oyun lobi, gece, gündüz, oylama ve bitiş fazlarından geçer. Her fazın bir süresi vardır ve süre dolunca fazı sunucu ilerletir. Gece 25 saniyedir: ilk 15 saniye seçim, kalan 10 saniye eylemlerin uygulanması içindir. Oylama, herkes oy kullanınca süre dolmadan da biter. İstemciden gelen süre veya faz bilgisine güvenilmez. Aynı faz iki eşzamanlı istekle iki kez ilerletilemez.
+
+### 3.2 Role özel gizli bilgi
+Hiçbir oyuncu başkasının rolünü sunucu yanıtından öğrenememelidir. Aynı sunucu adresi her oyuncuya farklı veri döndürür. Vampirler birbirini görmez. Kâhin ek olarak yalnızca sorguladığı oyuncuların rolünü görür. Hayalet yeni gizli bilgi görmez. Sunucu, vampirin başka bir vampiri seçmesini reddetmez, çünkü ret cevabı rolü sızdırır.
+
+### 3.3 Oylama sayımı ve eşitlik kuralı
+Oyuncular bir kişiye oy verir veya pas geçer. Oy vermeyen pas sayılır. En çok oyu alan oyuncu elenir. En yüksek oyda eşitlik varsa ya da en çok oyu pas aldıysa kimse elenmez.
+
+### 3.4 Kazanma koşulu denetimi
+Her gece çözümünden ve her oylamadan sonra kazanan kontrol edilir. Hayatta vampir kalmazsa köylü takımı, hayattaki vampir sayısı diğer oyuncuların sayısına eşit ya da fazla olursa vampir takımı kazanır.
+
+### 3.5 Gece eylemlerinin sıralı çözümü
+Gece eylemleri sunucuda sabit bir sırayla çözülür: tuzakçı, vampir, doktor, kâhin. Tuzağa takılan eylem iptal olur. Sonuçlar sabaha kadar gizli tutulur ve sabah toplu açıklanır.
 ## 2. Kapsam dışı
 
 - Oyun içi sohbet yoktur. Tartışma oyuncular arasında oyun dışında yapılır.
