@@ -137,6 +137,26 @@ Her gece sonucundan ve her oylamadan sonra kazanan kontrol edilir. Tüm vampirle
 ## 4. Kullanıcı hikâyeleri
 
 ## 5. İşlevsel gereksinimler (FR)
+| :--- | :--- | :--- |
+| FR-1 | Sistem, kullanıcıların e-posta ve şifreyle kayıt olmasını sağlamalı. | US-1 |
+| FR-2 | Sistem, kayıtlı kullanıcıların giriş ve çıkış işlemlerini yapabilmesini sağlamalı. | US-1 |
+| FR-3 | Sistem, oyuncuların oda kodunu aratarak veya filtreleyerek mevcut bir odaya katılabilmesini sağlamalı. | US-2 |
+| FR-4 | Sistem, odaya en az 5, en fazla 12 oyuncu katıldığında yalnızca oda kurucusunun oyunu başlatabilmesini sağlamalı; bu aralığın dışında başlatmayı reddetmeli. | US-3 |
+| FR-5 | Sistem, oyun başlarken oyunculara en az 4 farklı rolü (Köylü, Vampir, Doktor, Kâhin ve isteğe bağlı Tuzakçı) rastgele dağıtabilmeli. | US-4 |
+| FR-6 | Sistem, Lobi, Gece, Gündüz, Oylama ve Bitiş fazları arasındaki geçişleri sunucu süresini baz alarak ilerletmeli ve aynı fazı iki kez işletmemeli. | US-5 |
+| FR-7 | Sistem, 25 saniyelik Gece fazının ilk 15 saniyesinde oyuncuların aksiyon seçimlerini almalı ve yapılan seçimin değiştirilmesini engellemeli. | US-6 |
+| FR-8 | Sistem, gece eylemlerini (Tuzakçı, Vampir, Doktor, Kâhin) ve oyuncuların oylarını istemciye güvenmeden doğrudan sunucu tarafında doğrulamalı ve çözmeli. | US-6 |
+| FR-9 | Sistem, her oyuncuya yalnızca kendi rolünü göstermeli; başka bir oyuncunun gizli rolü (vampirlerin kimliği dahil) hiçbir yanıtta yer almamalı. | US-7 |
+| FR-10 | Sistem, 75 saniyelik Gündüz fazı başladığında, gece ölen oyuncuları veya "kimse ölmedi" bilgisini sabah duyurusu olarak göstermeli. | US-8 |
+| FR-11 | Sistem, 30 saniyelik Oylama fazında yalnızca canlı oyuncuların birbirine oy vermesini veya pas geçmesini sağlamalı; her oyuncu yalnızca bir oy kullanabilmeli. | US-9 |
+| FR-12 | Sistem, oylamada eşitlik çıkması veya en çok oyu "pas" seçeneğinin alması durumunda o gün kimseyi elememeli. | US-9 |
+| FR-13 | Sistem, oylamayla elenen oyuncunun rolünü herkese açıklarken, kâhin istisnası dışında gece ölen oyuncuların rollerini gizli tutmalı. | US-10 |
+| FR-14 | Sistem, her gece çözümünden ve her oylamadan sonra kazanma koşullarını kontrol ederek oyunun bitip bitmediğine karar vermeli. | US-11 |
+| FR-15 | Sistem, oyun sona erdiğinde kazanan takımı, tüm oyuncuların rollerini ve olay özetini gösteren bir rapor ekranı sunabilmeli. | US-12 |
+| FR-16 | Sistem, giriş yapmış kullanıcıya benzersiz kodlu yeni bir oda (lobi) kurma imkânı vermeli ve kullanıcıyı oda kurucusu yapmalı. | US-13 |
+| FR-17 | Sistem, oda kurucusunun vampir ve tuzakçı sayısını oyuncu sayısına göre sınırlı seçeneklerle ayarlamasını sağlamalı. | US-14 |
+| FR-18 | Sistem, ölen ve elenen oyuncuyu hayalet yapmalı: oyunu izleyebilir, oy veremez, eylem yapamaz, yeni gizli bilgi görmez. | US-15 |
+| FR-19 | Sistem, oyun günlüğüne başlangıcı, faz değişimlerini, gece sonucunu, oylama sonucunu, elemeyi ve bitişi yazmalı; gizli gece eylemlerini oyun bitene kadar göstermemeli. | US-16 |
 
 ## 6. İşlevsel olmayan gereksinimler (NFR)
 
