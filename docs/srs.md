@@ -135,6 +135,242 @@ Gündüz oyuncular oy verir veya pas geçer. En çok oyu alan oyuncu elenir. Eş
 Her gece sonucundan ve her oylamadan sonra kazanan kontrol edilir. Tüm vampirler elenirse köylüler, canlı vampir sayısı canlı köylü tarafının sayısına eşit olursa vampirler kazanır.
 
 ## 4. Kullanıcı hikâyeleri
+## 4. Kullanıcı hikayeleri
+ 
+### US-1 · Kayıt, giriş ve çıkış
+ 
+**Hikaye:** Oyuncu olarak, e-posta ve şifremle kayıt olup giriş ve çıkış yapmak istiyorum, böylece oyunlara kimliğimle katılabilirim.
+ 
+**İlgili gereksinimler:** FR-1, FR-2
+ 
+**Kabul kriterleri:**
+ 
+- [ ] Geçerli e-posta ve şifreyle kayıt oluşturulur; aynı e-posta ikinci kez kullanılamaz
+- [ ] Şifre password_hash ile saklanır, düz metin tutulmaz
+- [ ] Hatalı girişte anlaşılır hata mesajı gösterilir
+- [ ] Başarılı girişte session_regenerate_id çağrılır
+- [ ] Çıkış yapılınca oturum sonlandırılır ve korumalı sayfalara erişilemez
+
+ 
+### US-2 · Oda koduyla odaya katılma
+ 
+**Hikaye:** Oyuncu olarak, oda kodunu aratarak ya da filtreleyerek mevcut bir odaya katılmak istiyorum, böylece arkadaşlarımın oyununa dahil olabilirim.
+ 
+**İlgili gereksinimler:** FR-3 · **İlgili NFR:** NFR-1
+ 
+**Kabul kriterleri:**
+ 
+- [ ] Geçerli kodla oyuncu lobiye eklenir ve diğer oyuncular onu lobide görür
+- [ ] Oda kodu aratılabilir ve/veya listelenen odalar filtrelenebilir
+- [ ] Geçersiz kodda hata mesajı gösterilir
+- [ ] 12 oyunculu dolu odaya katılım reddedilir ve uyarı 3 sn içinde gösterilir (NFR-1)
+- [ ] Oyun başladıktan sonra odaya katılım yapılamaz
+
+ 
+### US-3 · Oyunu başlatma
+ 
+**Hikaye:** Oda kurucusu olarak, odaya yeterli oyuncu katılınca oyunu başlatmak istiyorum, böylece oyun başlar.
+ 
+**İlgili gereksinimler:** FR-4 · **İlgili NFR:** NFR-3
+ 
+**Kabul kriterleri:**
+ 
+- [ ] Oyun yalnızca oda kurucusunun isteğiyle başlar; başkasının isteği reddedilir (yetki kontrolü)
+- [ ] Oyuncu sayısı 5-12 aralığındaysa oyun başlar
+- [ ] Oyuncu sayısı 5'ten azsa ya da 12'den fazlaysa başlatma reddedilir ve hata mesajı gösterilir (NFR-3)
+- [ ] Başlangıç günlüğe yazılır ve oyun Gece fazına geçer
+
+ 
+### US-4 · Rol dağıtımı
+ 
+**Hikaye:** Oyuncu olarak, oyun başlarken rolümün rastgele atanmasını istiyorum, böylece oyun adil olur.
+ 
+**İlgili gereksinimler:** FR-5
+ 
+**Kabul kriterleri:**
+ 
+- [ ] Roller random_int/shuffle ile her oyunda rastgele dağıtılır
+- [ ] Her oyunda 1 doktor ve 1 kâhin vardır; en az Köylü, Vampir, Doktor, Kâhin rolleri kullanılır
+- [ ] Ayarlanan sayıda vampir ve (varsa) tuzakçı atanır
+- [ ] Tuzakçı eklenirse bir köylünün yerini alır; kalan oyuncular köylü olur
+
+ 
+### US-5 · Faz ve süre yönetimi
+ 
+**Hikaye:** Oyuncu olarak, oyunun hangi fazda olduğunu ve kalan süreyi görmek istiyorum, böylece ne zaman hamle yapacağımı bilirim.
+ 
+**İlgili gereksinimler:** FR-6 · **İlgili NFR:** NFR-6
+ 
+**Kabul kriterleri:**
+ 
+- [ ] Fazlar Lobi → Gece (25 sn) → Gündüz (75 sn) → Oylama (30 sn) → Bitiş sırasıyla ilerler
+- [ ] Faz ve kalan süre ekranda görünür ve AJAX polling ile güncellenir
+- [ ] Süre dolunca sunucu fazı kendisi ilerletir; istemciden gelen süre bilgisine güvenilmez
+- [ ] Erken istek ya da değiştirilmiş istemci süresi fazı erkene alamaz
+- [ ] Eş zamanlı birden fazla istek gelse de faz yalnızca bir kez ilerler (PDO transaction, NFR-6)
+- [ ] Gündüz fazında uygulama içi sohbet yoktur; tartışma uygulama dışında yapılır
+- [ ] Her faz değişimi günlüğe yazılır
+
+ 
+### US-6 · Gece eylemleri
+ 
+**Hikaye:** Vampir, doktor, kâhin ve tuzakçı olarak, gecenin ilk 15 saniyesinde eylemimi seçmek istiyorum, böylece rolümün görevini yapabilirim.
+ 
+**İlgili gereksinimler:** FR-7, FR-8
+ 
+**Kabul kriterleri:**
+ 
+- [ ] Eylem seçimi yalnızca 25 sn'lik Gece fazının ilk 15 saniyesinde kabul edilir ve seçim değiştirilemez (FR-7)
+- [ ] Tüm gece eylemleri sunucuda doğrulanır; istemciye güvenilmez (FR-8)
+- [ ] Vampir kendini seçemez, başka vampiri seçebilir (vampir kimliği sızmaz); hiç seçim yapılmazsa vampir kurbanı olmaz; vampirler farklı hedef seçerse birden fazla kişi kurban olur
+- [ ] Doktor kendisi dahil canlı birini koruyabilir; art arda iki gece kendini koruyamaz
+- [ ] Kâhin kendisi hariç canlı birini sorgular; sonuç yalnızca kâhine döner
+- [ ] Tuzakçı kendi evine tuzak kuramaz; hedef eve eylem yapan ilk oyuncunun eylemi iptal edilir
+- [ ] Gece sonu çözüm sırası: tuzaklar → vampir saldırısı ile doktor koruması → kâhin sorgusu
+- [ ] Tuzakçı yalnızca birinin takılıp takılmadığını görür; takılan kişi yalnızca "tuzağa takıldın" bilgisini alır
+- [ ] Ölü ve elenen oyuncunun gece eylemi sunucuda reddedilir
+
+ 
+### US-7 · Rol gizliliği
+ 
+**Hikaye:** Oyuncu olarak, rolümü yalnızca benim görmemi istiyorum, böylece diğer oyuncular gizli bilgime ulaşamaz.
+ 
+**İlgili gereksinimler:** FR-9 · **İlgili NFR:** NFR-7
+ 
+**Kabul kriterleri:**
+ 
+- [ ] Her oyuncu yalnızca kendi rolünü görür; vampir diğer vampirlerin kim olduğunu görmez
+- [ ] Aynı JSON uç noktası her oyuncuya role göre filtrelenmiş farklı veri döner
+- [ ] Kâhin dışındaki hiçbir oyuncunun API yanıtında başkasının rolü bulunmaz (NFR-7)
+- [ ] Başka oyuncunun rolü geliştirici araçlarındaki ağ yanıtında da görünmez
+- [ ] Gece eylemleri sabah duyurusuna kadar hiçbir oyuncuya gösterilmez
+
+ 
+### US-8 · Sabah duyurusu
+ 
+**Hikaye:** Oyuncu olarak, gece olanları sabah toplu olarak görmek istiyorum, böylece gündüz tartışmasına hazırlanırım.
+ 
+**İlgili gereksinimler:** FR-10
+ 
+**Kabul kriterleri:**
+ 
+- [ ] 75 sn'lik Gündüz fazı başlayınca duyuru gösterilir: "Bu gece X öldü" ya da "Bu gece kimse ölmedi"
+- [ ] Doktorun birini kurtarıp kurtarmadığı açıklanmaz
+- [ ] Doktorun koruduğu kişi vampir kurbanıysa ölmez, diğer kurbanlar ölür
+- [ ] Gece sonucu günlüğe yazılır
+
+ 
+### US-9 · Oy verme ve eleme
+ 
+**Hikaye:** Canlı oyuncu olarak, oylamada bir oyuncuya oy vermek ya da pas geçmek istiyorum, böylece şüpheli birini eleyebilirim.
+ 
+**İlgili gereksinimler:** FR-11, FR-12 · **İlgili NFR:** NFR-5
+ 
+**Kabul kriterleri:**
+ 
+- [ ] 30 sn'lik Oylama fazında yalnızca canlı oyuncular oy verebilir; ölü ve elenenler veremez
+- [ ] Oyuncu kendine oy veremez; her oyuncunun bir oy hakkı vardır, 2. ve sonraki oylar reddedilir (NFR-5)
+- [ ] Herkes oy kullanırsa oylama süre dolmadan biter; süre dolana kadar oy vermeyen pas sayılır
+- [ ] En çok oyu alan oyuncu elenir
+- [ ] En yüksek oyda eşitlik varsa ya da en çok oy "pas" ise kimse elenmez (FR-12)
+- [ ] Oylama sonucu ve eleme günlüğe yazılır
+
+ 
+### US-10 · Rol açıklama kuralı
+ 
+**Hikaye:** Oyuncu olarak, ölen oyuncuların rollerinin ne zaman açıklandığını bilmek istiyorum, böylece oyun kuralları net olur.
+ 
+**İlgili gereksinimler:** FR-13
+ 
+**Kabul kriterleri:**
+ 
+- [ ] Oylamayla elenen oyuncunun rolü herkese açıklanır
+- [ ] Gece ölen oyuncunun rolü açıklanmaz
+- [ ] İstisna: kâhin gece ölse de oylamayla elense de rolü herkese açıklanır
+- [ ] Açıklanan roller herkese görünür; diğer gizli roller görünmez
+
+ 
+### US-11 · Kazanma koşulunu denetleme
+ 
+**Hikaye:** Oyuncu olarak, oyunun doğru anda ve doğru kazananla bitmesini istiyorum, böylece sonuca güvenebilirim.
+ 
+**İlgili gereksinimler:** FR-14 · **İlgili NFR:** NFR-4
+ 
+**Kabul kriterleri:**
+ 
+- [ ] Kontrol her gece çözümünden ve her oylamadan sonra yapılır
+- [ ] Hayatta vampir kalmayınca köylü takımı kazanır (kâhin, doktor, tuzakçı ve köylü köylü tarafındadır)
+- [ ] Hayattaki vampir sayısı, hayattaki vampir olmayan oyuncu sayısına eşit ya da fazla olunca vampir takımı kazanır
+- [ ] Kazanan varsa oyun Bitiş fazına geçer; yoksa sıradaki faza devam eder
+- [ ] Kazanma hesabı sınır durumları dahil PHPUnit testleriyle doğrulanır (NFR-4)
+
+ 
+### US-12 · Oyun sonu raporu
+ 
+**Hikaye:** Oyuncu olarak, oyun bitince kazanan takımı ve oyun özetini görmek istiyorum, böylece oyunun nasıl bittiğini değerlendirebilirim.
+ 
+**İlgili gereksinimler:** FR-15
+ 
+**Kabul kriterleri:**
+ 
+- [ ] Rapor ekranında kazanan takım görünür
+- [ ] Oyun bitince tüm oyuncuların rolleri açıklanır
+- [ ] Olay özeti gece eylemleri dahil günlükten oluşturulur
+- [ ] Oyunun bittiği doğrulanmadan rapor gösterilmez
+
+ 
+### US-13 · Oda kurma
+ 
+**Hikaye:** Oda kurucusu olarak, yeni bir oda kurup oda kodunu almak istiyorum, böylece arkadaşlarımı odaya davet edebilirim.
+ 
+**İlgili gereksinimler:** FR-16 · **İlgili NFR:** NFR-2
+ 
+**Kabul kriterleri:**
+ 
+- [ ] Oda kurulunca en az 6 karakterli benzersiz bir oda kodu üretilir ve kurucuya gösterilir (NFR-2)
+- [ ] Kurucu otomatik olarak odanın ilk oyuncusu olur
+- [ ] Oda Lobi durumunda açılır
+
+ 
+### US-14 · Rol sayılarını ayarlama
+ 
+**Hikaye:** Oda kurucusu olarak, vampir ve tuzakçı sayısını oyuncu sayısına göre ayarlamak istiyorum, böylece oyunun zorluğunu belirleyebilirim.
+ 
+**İlgili gereksinimler:** FR-17
+ 
+**Kabul kriterleri:**
+ 
+- [ ] 5-7 oyunculu odada vampir sayısı yalnızca 1 olabilir
+- [ ] 8-12 oyunculu odada vampir sayısı 1-3 arasında seçilebilir
+- [ ] Tuzakçı sayısı (1 ya da 2) yalnızca 8 ve üzeri oyuncuda seçilebilir
+- [ ] Yalnızca oda kurucusu bu ayarları değiştirebilir (yetki kontrolü)
+
+ 
+### US-15 · Hayalet olarak izleme
+ 
+**Hikaye:** Ölen ya da elenen oyuncu olarak, oyunu hayalet olarak izlemek istiyorum, böylece oyuna katılamasam da nasıl bittiğini görebilirim.
+ 
+**İlgili gereksinimler:** FR-18
+ 
+**Kabul kriterleri:**
+ 
+- [ ] Hayalet oyunun faz, duyuru ve günlüğünü izleyebilir
+- [ ] Hayalet oy veremez ve gece eylemi yapamaz (sunucu reddeder)
+- [ ] Hayalet ölmeden önce öğrendiklerini görür, yeni gizli bilgi görmez
+
+ 
+### US-16 · Oyun günlüğünü izleme
+ 
+**Hikaye:** Oyuncu olarak, oyun günlüğünden olanları görmek istiyorum, böylece kaçırdığım olayları anlayıp oyunu takip edebilirim.
+ 
+**İlgili gereksinimler:** FR-19
+ 
+**Kabul kriterleri:**
+ 
+- [ ] Günlükte başlangıç, faz değişimleri, gece sonucu, oylama sonucu, eleme ve bitiş kayıtları vardır
+- [ ] Gizli gece eylemleri oyun bitene kadar günlükte görünmez
+- [ ] Günlük canlı oyuncular ve hayaletler tarafından görülebilir
+
 
 ## 5. İşlevsel gereksinimler (FR)
 
