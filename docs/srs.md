@@ -32,7 +32,7 @@ Vampir Köylü, 5 ile 12 oyuncunun tarayıcıdan oynadığı bir rol oyunudur. O
 | Rol     | Taraf     | Gece yeteneği                                           |
 | ------- | --------- | ------------------------------------------------------- |
 | Köylü   | Köylüler  | Yok                                                     |
-| Vampir  | Vampirler | Kurban seçer. Vampirler birbirini görür.                |
+| Vampir  | Vampirler | Kurban seçer. Vampirler birbirini görmez.                |
 | Doktor  | Köylüler  | Kendi dahil bir kişiyi korur.                           |
 | Kâhin   | Köylüler  | Bir oyuncunun rolünü öğrenir.                           |
 | Tuzakçı | Köylüler  | İsteğe bağlı rol (bonus). Bu sürümde uygulanmayacaktır. |
@@ -52,7 +52,7 @@ Vampir sayısı en fazla 3'tür. 8 oyuncudan azsa tam 1 vampir bulunur.
 | Faz    | Süre           | Açıklama                                                                                         |
 | ------ | -------------- | ------------------------------------------------------------------------------------------------ |
 | Lobi   | Süresiz        | Oyuncular toplanır, oda sahibi başlatır.                                                         |
-| Gece   | 60 sn          | Vampir, doktor ve kâhin eylemini seçer. Vampirlerin kurban seçimi gecenin ilk 15 saniyesindedir. |
+| Gece   | 25 sn          | Vampir, doktor ve kâhin eylemini seçer. Vampirlerin kurban seçimi gecenin ilk 15 saniyesindedir. |
 | Gündüz | 75 sn          | Gece sonuçları açıklanır, oyuncular tartışır.                                                    |
 | Oylama | En fazla 30 sn | Herkes oy kullanınca süre dolmadan biter.                                                        |
 | Bitiş  | ,              | Kazanan açıklanır.                                                                               |
@@ -61,8 +61,9 @@ Gece, gündüz ve oylama kazanan çıkana kadar sırayla tekrarlanır. Süre dol
 
 #### 1.4.4 Gece
 
-- Vampirler kurban oylaması yapar. En çok oyu alan kişi hedef olur. Eşitlikte o gece kimse ölmez.
+- Vampirlerin hepsinin seçtiği kurban ölür.
 - Doktor, kendisi dahil bir oyuncuyu korur. Korunan kişi saldırıya uğrasa da ölmez.
+- Doktoor kendini 2 gece üst üste koruyamaz ama herhangi bir köylüyü art arda koruyabilir.
 - Kâhin bir oyuncunun rolünü öğrenir. Sonucu yalnızca kendisi görür.
 - Süre dolana kadar eylem seçilmezse o eylem boş geçer.
 
@@ -92,20 +93,21 @@ Gece, gündüz ve oylama kazanan çıkana kadar sırayla tekrarlanır. Süre dol
 Kontrol her gece sonuçlandığında ve her oylamadan sonra yapılır.
 
 - Köylüler kazanır: Tüm vampirler elenince.
-- Vampirler kazanır: Canlı vampir sayısı, canlı köylü tarafı oyuncularının (köylü, doktor, kâhin) sayısına eşit olunca.
+- Vampirler kazanır: Canlı vampir sayısı, canlı köylü tarafı oyuncularının (köylü, doktor, kâhin,
+tuzakçı) sayısına eşit olunca.
 - Oylamada köylü, doktor ve kâhin köylü tarafında sayılır.
 
 #### 1.4.9 Gizlilik kuralı
 
 - Her oyuncu yalnızca kendi rolünü görür.
-- Vampir, yalnızca diğer vampirleri ek olarak görür.
+- Vampir, diğer vampirleri göremez.
 - Sunucu yanıtında bu istisna dışında başkasının rolü bulunmaz.
 
 ## 2. Kapsam dışı
 
 - Oyun içi sohbet yoktur. Tartışma uygulama dışında yapılır.
 - Bot (bilgisayar) oyuncular yoktur.
-- Tuzakçı isteğe bağlı (bonus) roldür, çekirdek oyun tamamlandıktan sonra eklenir.
+
 
 ## 3. Çekirdek problem
 
@@ -405,7 +407,7 @@ Her gece sonucundan ve her oylamadan sonra kazanan kontrol edilir. Tüm vampirle
 | FR-10 | Sistem, 75 saniyelik Gündüz fazı başladığında, gece ölen oyuncuları veya "kimse ölmedi" bilgisini sabah duyurusu olarak göstermeli. | US-8 |
 | FR-11 | Sistem, 30 saniyelik Oylama fazında yalnızca canlı oyuncuların birbirine oy vermesini veya pas geçmesini sağlamalı; her oyuncu yalnızca bir oy kullanabilmeli. | US-9 |
 | FR-12 | Sistem, oylamada eşitlik çıkması veya en çok oyu "pas" seçeneğinin alması durumunda o gün kimseyi elememeli. | US-9 |
-| FR-13 | Sistem, oylamayla elenen oyuncunun rolünü herkese açıklarken, kâhin istisnası dışında gece ölen oyuncuların rollerini gizli tutmalı. | US-10 |
+| FR-13 | Sistem, oylamayla elenen oyuncunun rolünü herkese açıklarken, kâhin sorguları ve açıklanmış roller hariç gece ölen oyuncuların rollerini gizli tutmalı. | US-10 |
 | FR-14 | Sistem, her gece çözümünden ve her oylamadan sonra kazanma koşullarını kontrol ederek oyunun bitip bitmediğine karar vermeli. | US-11 |
 | FR-15 | Sistem, oyun sona erdiğinde kazanan takımı, tüm oyuncuların rollerini ve olay özetini gösteren bir rapor ekranı sunabilmeli. | US-12 |
 | FR-16 | Sistem, giriş yapmış kullanıcıya benzersiz kodlu yeni bir oda (lobi) kurma imkânı vermeli ve kullanıcıyı oda kurucusu yapmalı. | US-13 |
