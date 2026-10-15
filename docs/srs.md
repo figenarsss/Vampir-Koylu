@@ -424,3 +424,79 @@ Her gece sonucundan ve her oylamadan sonra kazanan kontrol edilir. Tüm vampirle
 | NFR-7 | Kâhin dışındaki bir oyuncunun API yanıtlarında başka bir oyuncunun gizli rolü bulunmamalıdır; sızan rol sayısı 0 olmalıdır. | Her rolle giriş yapılıp tüm uç nokta yanıtları taranır.
 
 ## 7. Kullanım senaryoları (use-case)
+
+
+
+## 8. İzlenebilirlik tablosu 
+# Gereksinim–Test İzlenebilirlik Tablosu
+
+Tür: **B** = PHPUnit birim testi, **E** = entegrasyon/HTTP testi, **M** = manuel/komut ile ölçüm. Durum: Bekliyor / Geçti / Kaldı.
+
+## 1. Kapsama tablosu (hangi gereksinim hangi testle doğrulanıyor)
+
+| Gereksinim | Test no |
+| :--- | :--- |
+| FR-1 | T-01, T-02 |
+| FR-2 | T-03 |
+| FR-3 | T-04, T-05, T-06 |
+| FR-4 | T-07, T-08 |
+| FR-5 | T-09 |
+| FR-6 | T-10, T-11, T-12 |
+| FR-7 | T-13 |
+| FR-8 | T-14, T-15, T-16, T-17 |
+| FR-9 | T-18, T-19 |
+| FR-10 | T-20 |
+| FR-11 | T-21, T-22, T-23 |
+| FR-12 | T-24 |
+| FR-13 | T-25 |
+| FR-14 | T-26, T-27 |
+| FR-15 | T-28 |
+| FR-16 | T-29 |
+| FR-17 | T-30 |
+| FR-18 | T-31 |
+| FR-19 | T-32 |
+| NFR-1 | T-05 |
+| NFR-2 | T-29 |
+| NFR-3 | T-07 |
+| NFR-4 | T-33 (tüm B testleri) |
+| NFR-5 | T-22 |
+| NFR-6 | T-12 |
+| NFR-7 | T-19 |
+
+## 2. Test ayrıntıları
+
+| Test no | Gereksinim | Test (sınıf::metot) | Tür | Senaryo | Beklenen sonuç | Durum |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| T-01 | FR-1 | AuthServiceTest::testRegisterHashesPassword | B | Geçerli e-posta ve şifreyle kayıt | Kullanıcı oluşur; kayıtlı şifre düz metin değil, `password_hash` çıktısıdır | Bekliyor |
+| T-02 | FR-1 | AuthServiceTest::testDuplicateEmailRejected | B | Aynı e-postayla ikinci kayıt | Kayıt reddedilir, anlaşılır hata döner | Bekliyor |
+| T-03 | FR-2 | AuthControllerTest::testLoginLogout | E | Hatalı şifre; doğru şifre; çıkış | Hatalı şifre reddedilir; girişte `session_regenerate_id` çağrılır; çıkıştan sonra korumalı sayfa açılmaz | Bekliyor |
+| T-04 | FR-3 | RoomServiceTest::testJoinWithCode | B | Geçerli ve geçersiz oda koduyla katılım | Geçerli kodda oyuncu eklenir; geçersizde hata | Bekliyor |
+| T-05 | FR-3, NFR-1 | RoomControllerTest::testFullRoomRejected | E | 12 oyunculu odaya 13. oyuncu katılmayı dener | Katılım reddedilir; uyarı en geç 3 sn içinde gösterilir (süre ölçülür) | Bekliyor |
+| T-06 | FR-3 | RoomServiceTest::testJoinAfterStartRejected | B | Oyun başladıktan sonra katılım | Reddedilir | Bekliyor |
+| T-07 | FR-4, NFR-3 | GameStartServiceTest::testStartOutsideRangeRejected | B | 1, 2, 3, 4 ve 13 oyuncuyla başlatma | Başlatma isteklerinin %100'ü reddedilir | Bekliyor |
+| T-08 | FR-4 | GameStartServiceTest::testStartByHostOnly | B | 5 ve 12 oyuncuyla kurucu başlatır; kurucu olmayan başlatmayı dener | Kurucu başlatabilir; diğeri yetki hatası alır | Bekliyor |
+| T-09 | FR-5 | RoleAssignmentServiceTest::testDistribution | B | 5-12 oyuncu için rol dağıtımı (tuzakçılı ve tuzaksız) | 1 doktor, 1 kâhin, doğru sayıda vampir; en az 4 farklı rol; tuzakçı bir köylünün yerini alır | Bekliyor |
+| T-10 | FR-6 | PhaseServiceTest::testPhaseOrderAndDurations | B | Bir oyunun fazları ilerletilir | Sıra Lobi → Gece (25 sn) → Gündüz (75 sn) → Oylama (30 sn) → Gece/Bitiş | Bekliyor |
+| T-11 | FR-6 | PhaseServiceTest::testServerTimeOnly | B | Süre dolmadan ve istemci "süre doldu" diyerek ilerletme isteği | Erken ilerletme reddedilir; süre yalnızca sunucu saatine göre hesaplanır | Bekliyor |
+| T-12 | FR-6, NFR-6 | PhaseControllerTest::testConcurrentAdvance | E | Aynı faza 10 eş zamanlı ilerletme isteği | Faz yalnızca 1 kez ilerler; günlükte tek faz geçişi vardır | Bekliyor |
+| T-13 | FR-7 | NightActionServiceTest::testSelectionWindow | B | Gecenin 10. sn'sinde, 16. sn'sinde seçim; seçimi değiştirme | 10. sn kabul; 16. sn reddedilir; değiştirme reddedilir | Bekliyor |
+| T-14 | FR-8 | NightActionServiceTest::testVampireRules | B | Vampir kendini seçer; başka vampiri seçer; seçim yapmaz; iki vampir farklı hedef seçer | Kendini seçme reddedilir; vampiri seçme reddedilmez; seçimsiz gecede kurban yok; iki hedef de kurban olur | Bekliyor |
+| T-15 | FR-8 | NightResolverTest::testDoctorProtection | B | Doktor kurbanı korur; kendini art arda iki gece korur | Korunan kurban ölmez, diğer kurbanlar ölür; art arda kendini koruma reddedilir | Bekliyor |
+| T-16 | FR-8 | NightResolverTest::testSeerAndTrapper | B | Kâhin kendini sorgular; tuzakçı kendi evine kurar; iki kişi tuzaklı eve gider | Kâhin kendini seçemez; tuzakçı kendi evine kuramaz; yalnızca ilk gelen takılır, eylemi iptal olur | Bekliyor |
+| T-17 | FR-8 | NightResolverTest::testResolutionOrder | B | Tuzak, saldırı, koruma ve sorgu aynı gece; ölü oyuncu eylem gönderir | Sıra tuzak → vampir/doktor → kâhin uygulanır; ölü oyuncunun eylemi reddedilir | Bekliyor |
+| T-18 | FR-9 | RoleVisibilityFilterTest::testOwnRoleOnly | B | Her rol için oyun durumu JSON'u üretilir | Herkes yalnızca kendi rolünü görür; vampir diğer vampirleri görmez; kâhin sorguladığını görür | Bekliyor |
+| T-19 | FR-9, NFR-7 | RoleLeakTest::testNoRoleLeakInAnyEndpoint | E | Her rolle giriş yapılıp tüm uç nokta yanıtları taranır | Başkasının gizli rolü (kâhin sorguları ve açıklanan roller hariç) yanıtlarda 0 kez geçer | Bekliyor |
+| T-20 | FR-10 | MorningAnnouncementTest::testAnnouncementText | B | Gece biri ölür; kimse ölmez; doktor kurtarır | "Bu gece X öldü" / "Bu gece kimse ölmedi"; doktorun kurtardığı bilgisi açıklanmaz | Bekliyor |
+| T-21 | FR-11 | VoteServiceTest::testVoteEligibility | B | Ölü oyuncu oy verir; oyuncu kendine oy verir; oyuncu pas geçer | Ölü ve kendine oy reddedilir; pas kabul edilir | Bekliyor |
+| T-22 | FR-11, NFR-5 | VoteControllerTest::testSingleVote | E | Aynı oyuncudan 5 oy isteği | 4'ü reddedilir; `votes` tablosunda oyuncu başına 1 kayıt kalır | Bekliyor |
+| T-23 | FR-11 | VoteServiceTest::testTimeoutAndEarlyFinish | B | Herkes oy kullanır; süre dolar ve bazıları oy vermemiştir | Herkes kullanınca oylama erken biter; vermeyenler pas sayılır | Bekliyor |
+| T-24 | FR-12 | VoteServiceTest::testTallyAndTie | B | Eşitlik; en çok oy "pas"; tek en çok oy alan | Eşitlikte ve pasta kimse elenmez; tek en çok oyu alan elenir | Bekliyor |
+| T-25 | FR-13 | RoleRevealTest::testRevealRules | B | Oylamayla elenme; gece ölüm; kâhin ölümü (gece ve oylama) | Elenenin rolü açıklanır; gece ölenin açıklanmaz; kâhin istisnası uygulanır | Bekliyor |
+| T-26 | FR-14, NFR-4 | WinConditionServiceTest::testWinConditions | B | 0 vampir; vampir ≥ diğerleri; hiçbiri; tuzakçı hayatta | Köylü kazanır; vampir kazanır; oyun devam eder; tuzakçı köylü tarafında sayılır | Bekliyor |
+| T-27 | FR-14 | GameFlowTest::testCheckAfterNightAndVote | B | Gece çözümü sonrası ve oylama sonrası kazanan olur | Her iki durumda oyun Bitiş fazına geçer | Bekliyor |
+| T-28 | FR-15 | ReportControllerTest::testReport | E | Oyun bitmeden ve bittikten sonra rapor istenir | Bitmeden gösterilmez; bitince kazanan takım, tüm roller, olay özeti görünür | Bekliyor |
+| T-29 | FR-16, NFR-2 | RoomServiceTest::testRoomCodeUniqueness | B | 1000 oda oluştur | Kodlar ≥6 karakter; çakışan kod 0; kurucu odanın ilk oyuncusu | Bekliyor |
+| T-30 | FR-17 | RoomSettingsServiceTest::testRoleCountLimits | B | 5-7 ve 8-12 oyuncuda vampir/tuzakçı sayısı seç; kurucu olmayan değiştirir | 5-7'de vampir 1; 8-12'de 1-3; tuzakçı 2 yalnızca ≥8; kurucu dışı reddedilir | Bekliyor |
+| T-31 | FR-18 | GhostPolicyTest::testGhostRestrictions | B | Ölü oyuncu oy ve eylem dener; durumu izler | Oy ve eylem reddedilir; yeni gizli bilgi görmez | Bekliyor |
+| T-32 | FR-19 | GameLogServiceTest::testLogEntriesAndSecrecy | B | Oyun başlar, fazlar geçer, gece/oylama biter; oyun sürerken ve bittiğinde günlük istenir | Olaylar yazılır; gizli gece eylemleri oyun bitene kadar görünmez | Bekliyor |
+| T-33 | NFR-4 | — (komut) | M | `vendor/bin/phpunit` çalıştır | Başarısız test sayısı 0; çekirdek problem için B türündeki test sayısı hedefin üzerinde | Bekliyor |
