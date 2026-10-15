@@ -314,118 +314,95 @@ sequenceDiagram
 ---
 
 ## 4. ER diyagramı
-
-### 4.1 Diyagram
+# ER Diyagramı
 
 ```mermaid
 erDiagram
-    USERS ||--o{ ROOMS : "kurar"
+    USERS ||--o{ GAMES : "kurar"
     USERS ||--o{ PLAYERS : "oyuncu olur"
-    ROOMS ||--o{ PLAYERS : "icerir"
-    ROOMS ||--o| GAMES : "oynanir"
-    ROLES ||--o{ PLAYERS : "rolu"
-    GAMES ||--o{ NIGHT_ACTIONS : "geceler boyu"
-    GAMES ||--o{ VOTES : "oylamalar"
-    GAMES ||--o{ GAME_LOG : "kayit"
-    PLAYERS ||--o{ NIGHT_ACTIONS : "yapan"
-    PLAYERS ||--o{ VOTES : "oy veren"
+    GAMES ||--o{ PLAYERS : "içerir"
+    ROLES ||--o{ PLAYERS : "rolü"
+    GAMES ||--o{ PHASES : "fazları"
+    PHASES |o--o{ PLAYERS : "ölüm fazı"
+    PHASES ||--o{ ACTIONS : "gece eylemleri"
+    PLAYERS ||--o{ ACTIONS : "yapar"
+    PLAYERS ||--o{ ACTIONS : "hedef olur"
+    PHASES ||--o{ VOTES : "oylamalar"
+    PLAYERS ||--o{ VOTES : "oy verir"
+    PLAYERS |o--o{ VOTES : "oy alır"
+    GAMES ||--o{ GAME_LOGS : "günlüğü"
 
     USERS {
         int id PK
         string email UK
         string password_hash
-        string display_name
         datetime created_at
     }
-    ROOMS {
+    GAMES {
         int id PK
-        string code UK "en az 6 karakter"
-        int owner_id FK
+        string room_code UK
+        int host_user_id FK
+        string status "lobby, in_progress, finished"
         int vampire_count
-        int trapper_count
+        int trapper_count "0-2"
+        string winner_team "villager, vampire, NULL"
         datetime created_at
     }
     ROLES {
         int id PK
-        string name UK "KOYLU VAMPIR DOKTOR KAHIN TUZAKCI"
-        string team "KOYLU veya VAMPIR"
-    }
-    GAMES {
-        int id PK
-        int room_id FK "UK, oda basina tek oyun"
-        string phase "LOBBY NIGHT DAY VOTING ENDED"
-        int day_no
-        datetime phase_ends_at
-        string winner "NULL, KOYLU veya VAMPIR"
-        int version "iyimser kilit"
-        datetime started_at
-        datetime ended_at
+        string name UK "villager, vampire, doctor, seer, trapper"
+        string team "villager, vampire"
+        string night_action "kill, protect, inspect, trap, NULL"
+        string description
     }
     PLAYERS {
         int id PK
-        int room_id FK
+        int game_id FK
         int user_id FK
-        int role_id FK "oyun baslayana kadar NULL"
-        string status "ALIVE NIGHT_DEAD VOTED_OUT"
-        bool role_revealed
-        int last_protected_id FK "doktorun onceki gece korudugu, NULL"
-        datetime joined_at
+        int role_id FK "oyun başlayana kadar NULL"
+        boolean is_alive
+        string death_cause "night, vote, NULL"
+        int death_phase_id FK "NULL = yaşıyor"
     }
-    NIGHT_ACTIONS {
+    PHASES {
         int id PK
         int game_id FK
-        int night_no
-        int actor_id FK
-        int target_id FK
-        string type "TRAP ATTACK PROTECT INSPECT"
-        string result "kahin sorgusu, NULL"
-        bool cancelled
+        int sequence_no
+        string phase_type "night, day, vote"
+        int day_number
+        datetime started_at
+        datetime ends_at
+    }
+    ACTIONS {
+        int id PK
+        int phase_id FK
+        int actor_player_id FK
+        int target_player_id FK
+        boolean is_cancelled "tuzağa takıldıysa 1"
         datetime created_at
     }
     VOTES {
         int id PK
-        int game_id FK
-        int day_no
-        int voter_id FK
-        int target_id FK "NULL ise pas"
+        int phase_id FK
+        int voter_player_id FK
+        int target_player_id FK "NULL = pas"
         datetime created_at
     }
-    GAME_LOG {
+    GAME_LOGS {
         int id PK
         int game_id FK
         string event_type
         string message
-        bool is_secret
+        boolean is_secret "oyun bitene kadar gizli"
         datetime created_at
     }
 ```
 
-### 4.2 Tablolar, anahtarlar ve kısıtlar
+## 3NF Gerekçesi
 
-| Tablo | Birincil anahtar | Yabancı anahtarlar | Benzersizlik / kısıt |
-| :--- | :--- | :--- | :--- |
-| `users` | `id` | – | `email` benzersiz (FR-1) |
-| `rooms` | `id` | `owner_id` → users | `code` benzersiz, en az 6 karakter (NFR-2) |
-| `roles` | `id` | – | `name` benzersiz |
-| `games` | `id` | `room_id` → rooms | `room_id` benzersiz: bir odada tek oyun |
-| `players` | `id` | `room_id` → rooms, `user_id` → users, `role_id` → roles, `last_protected_id` → players | (`room_id`, `user_id`) benzersiz: aynı kullanıcı odaya bir kez girer |
-| `night_actions` | `id` | `game_id` → games, `actor_id` / `target_id` → players | (`game_id`, `night_no`, `actor_id`) benzersiz: gece seçimi değiştirilemez (FR-7) |
-| `votes` | `id` | `game_id` → games, `voter_id` / `target_id` → players | (`game_id`, `day_no`, `voter_id`) benzersiz: oyuncu başına tek oy (NFR-5) |
-| `game_log` | `id` | `game_id` → games | – |
+Oyun durumunu (faz, süre, ölü/diri) tek bir yerde tutmak yerine `games`, `players` ve `phases` olarak ayırdık; böylece faz geçişleri `phases`'e eklenen satırlarla yapılır ve `UNIQUE(game_id, sequence_no)` kısıtı faz geçişinin iki kez tetiklenmesini veritabanı seviyesinde engeller. Gizli rol tek bir sütunda (`players.role_id`) tutulur ve rol sızıntısı, sunucunun yanıtı role göre filtrelemesiyle önlenir. Oylar ve gece eylemleri ayrı tablolardadır; çünkü oy herkes için, eylem yalnızca rolü olanlar için vardır ve alanları farklıdır. Veri tekrarını önlemek için kullanıcı bilgisi `users`'ta, rol bilgisi `roles`'ta, oyun bilgisi `games`'te tutulur; diğer tablolar yalnızca `id` ile bunlara bağlanır ve böylece 3NF sağlanır.
 
-5-12 oyuncu sınırı, hayalet kuralları ve "oyun başladıktan sonra katılım yok" kuralı veritabanında değil servis katmanında (Oda ve FazYöneticisi) denetlenir; çünkü oyuncu sayısına bağlı bir kuralı tek başına satır kısıtı ifade edemez.
 
-### 4.3 3NF gerekçesi
-
-- **1NF:** Her sütun tek değer tutar. Oyuncu listesi, oy listesi gibi tekrarlayan gruplar sütuna yazılmaz, ayrı satırlara (`players`, `votes`, `night_actions`) bölünür.
-- **2NF:** Bileşik anahtara ihtiyaç duyan tablolarda (`players`: oda + kullanıcı) tüm sütunlar yapay `id` anahtarına tam bağımlıdır. (`room_id`, `user_id`) yalnızca benzersizlik kısıtıdır, anahtar değildir; kısmi bağımlılık oluşmaz.
-- **3NF:** Geçişli bağımlılık kalmaz.
-  - Oyuncunun takımı `players` içinde tutulmaz, `players.role_id → roles.team` üzerinden bulunur. Aksi halde `oyuncu → rol → takım` geçişli bağımlılığı oluşurdu ve rol ile takım çelişebilirdi.
-  - Oyuncunun görünen adı ve e-postası `users` tablosundadır, `players` içinde tekrarlanmaz.
-  - Kazanan takım `games` içinde tutulur, çünkü `games.id` bu değere doğrudan bağlıdır; rol tablosundan türetilemez.
-- **Bilinçli tekrar:** `players.status` ve `players.role_revealed` ayrı sütunlardır. Gece ölen oyuncunun rolü gizli, oylamayla elenenin rolü açıktır (FR-13); iki bilgi birbirinden türetilemediği için ayrı tutulur.
-
----
 
 ## 5. Tasarım desenleri
 

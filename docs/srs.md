@@ -35,7 +35,7 @@ Vampir Köylü, 5 ile 12 oyuncunun tarayıcıdan oynadığı bir rol oyunudur. O
 | Vampir  | Vampirler | Kurban seçer. Vampirler birbirini görmez.                |
 | Doktor  | Köylüler  | Kendi dahil bir kişiyi korur.                           |
 | Kâhin   | Köylüler  | Bir oyuncunun rolünü öğrenir.                           |
-| Tuzakçı | Köylüler  | İsteğe bağlı rol (bonus). Bu sürümde uygulanmayacaktır. |
+| Tuzakçı | Köylüler  | Tuzak kurar. |
 
 Roller oyun başlarken sunucuda rastgele ve gizli dağıtılır.
 
