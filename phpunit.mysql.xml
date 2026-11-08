@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Aynı testler, bu kez gerçek bir MySQL/MariaDB sunucusuna karşı çalışır (Aşama 3 doğrulaması).
+    Her test geçici bir veritabanı (vk_test_...) kurar ve sonunda siler; mevcut veritabanlarınıza dokunmaz.
+    Bağlantı ayarları ortam değişkenleriyle verilir (varsayılanlar parantez içinde):
+    TEST_MYSQL_HOST (127.0.0.1), TEST_MYSQL_PORT (3306), TEST_MYSQL_USER (root), TEST_MYSQL_PASSWORD (boş)
+    Kullanım:  composer test:mysql
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         cacheDirectory="storage/phpunit-cache"
+         colors="true"
+         failOnWarning="true"
+         failOnRisky="true">
+    <testsuites>
+        <testsuite name="Vampir Köylü (MySQL)">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <env name="TEST_BACKEND" value="mysql" force="true"/>
+    </php>
+</phpunit>

@@ -1,0 +1,5 @@
+# Apache (XAMPP) için: dosya olmayan tüm adresleri ön denetleyiciye yönlendirir.
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]

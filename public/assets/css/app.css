@@ -1,0 +1,94 @@
+/* Vampir Köylü - Bootstrap'in üzerine küçük bir gece teması. Resim yok; her şey CSS ve emoji ile. */
+
+:root {
+    --vk-bg-top: #0b1026;
+    --vk-bg-bottom: #1b1038;
+    --vk-card: rgba(22, 27, 58, 0.78);
+    --vk-border: rgba(148, 163, 255, 0.18);
+    --vk-accent: #d63a4a;
+}
+
+body {
+    min-height: 100vh;
+    background: linear-gradient(180deg, var(--vk-bg-top) 0%, var(--vk-bg-bottom) 100%) fixed;
+    color: #e8eaf6;
+}
+
+.navbar {
+    background: rgba(8, 11, 28, 0.7);
+    backdrop-filter: blur(6px);
+}
+
+.game-card {
+    background: var(--vk-card);
+    border: 1px solid var(--vk-border);
+    border-radius: 0.9rem;
+}
+
+.room-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    letter-spacing: 0.2em;
+    padding: 0.1rem 0.6rem;
+    border-radius: 0.5rem;
+    background: rgba(214, 58, 74, 0.2);
+    border: 1px solid rgba(214, 58, 74, 0.5);
+}
+
+.role-emoji {
+    font-size: 3rem;
+    line-height: 1;
+}
+
+/* Fazlara göre üst kart rengi */
+.stage-night #ust { border-color: #5865f2; box-shadow: 0 0 24px rgba(88, 101, 242, 0.25); }
+.stage-day #ust { border-color: #f2b705; box-shadow: 0 0 24px rgba(242, 183, 5, 0.2); }
+.stage-vote #ust { border-color: var(--vk-accent); box-shadow: 0 0 24px rgba(214, 58, 74, 0.25); }
+.stage-finished #ust { border-color: #2ecc71; }
+
+.winner-card {
+    border-color: rgba(46, 204, 113, 0.5);
+}
+
+.player-dead {
+    opacity: 0.55;
+    text-decoration: line-through;
+}
+
+.player-dead small {
+    text-decoration: none;
+    display: inline-block;
+}
+
+.log li {
+    padding: 0.25rem 0;
+    border-bottom: 1px dashed rgba(148, 163, 255, 0.12);
+}
+
+.tally-name {
+    width: 7rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tally-count {
+    width: 1.5rem;
+    text-align: right;
+}
+
+.list-group-item {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: var(--vk-border);
+    cursor: pointer;
+}
+
+.list-group-item:hover {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+/* Telefonda dokunması kolay hedefler */
+@media (max-width: 575.98px) {
+    .list-group-item {
+        padding: 0.85rem 1rem;
+    }
+}

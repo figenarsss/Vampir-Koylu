@@ -1,0 +1,2 @@
+# Makineye özel ayarlar (veritabanı şifresi vb.) repoya girmez
+config.local.php
