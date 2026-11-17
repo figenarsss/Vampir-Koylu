@@ -1,0 +1,40 @@
+{
+    "name": "vampir-koylu/vampir-koylu",
+    "description": "Vampir Köylü: 5-12 oyunculu, tarayıcıdan oynanan gizli rollü rol oyunu (PHP dönem projesi).",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.2",
+        "ext-mbstring": "*",
+        "ext-pdo": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0"
+    },
+    "suggest": {
+        "ext-pdo_mysql": "Aşama 3 (MySQL) depolaması için gerekli",
+        "ext-pdo_sqlite": "Testlerde PDO katmanını bellek içi SQLite ile çalıştırmak için gerekli"
+    },
+    "autoload": {
+        "psr-4": {
+            "VampirKoylu\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "VampirKoylu\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": [
+            "phpunit --colors=always",
+            "phpunit --colors=always -c phpunit.json.xml"
+        ],
+        "test:mysql": "phpunit --colors=always -c phpunit.mysql.xml",
+        "serve": "php -S localhost:8000 -t public"
+    },
+    "config": {
+        "sort-packages": true,
+        "process-timeout": 0
+    }
+}
