@@ -7,6 +7,7 @@ namespace VampirKoylu\Core;
 use Random\Randomizer;
 use VampirKoylu\Controllers\AdminController;
 use VampirKoylu\Controllers\AuthController;
+use VampirKoylu\Controllers\ChatController;
 use VampirKoylu\Controllers\GameController;
 use VampirKoylu\Controllers\HistoryController;
 use VampirKoylu\Controllers\HomeController;
@@ -33,6 +34,7 @@ use VampirKoylu\Repositories\UserRepositoryInterface;
 use VampirKoylu\Repositories\VoteRepositoryInterface;
 use VampirKoylu\Services\AdminService;
 use VampirKoylu\Services\AuthService;
+use VampirKoylu\Services\ChatService;
 use VampirKoylu\Services\GameService;
 use VampirKoylu\Services\GameStateBuilder;
 use VampirKoylu\Services\LobbyService;
@@ -112,6 +114,7 @@ final class Bootstrap
         $c->set(AuthService::class, fn () => new AuthService($repos->users, $clock));
         $c->set(AdminService::class, fn () => new AdminService($repos->users, $repos->reports));
         $c->set(LobbyService::class, fn () => new LobbyService($repos->games, $repos->players, $repos->transactions, $clock, $rules));
+        $c->set(ChatService::class, fn () => new ChatService($repos->games, $repos->players, $repos->phases, $repos->messages, $clock));
         $c->set(GameService::class, fn () => new GameService(
             $repos->games,
             $repos->players,
@@ -135,6 +138,7 @@ final class Bootstrap
             $c->get(NightHistory::class),
             $clock,
             $rules,
+            $c->get(ChatService::class),
         ));
 
         $c->set(HomeController::class, fn () => new HomeController($view, $repos->games));
@@ -148,6 +152,7 @@ final class Bootstrap
             $c->get(PhaseManager::class),
             $c->get(GameStateBuilder::class),
         ));
+        $c->set(ChatController::class, fn () => new ChatController($view, $repos->games, $c->get(ChatService::class)));
         $c->set(AdminController::class, fn () => new AdminController(
             $view,
             $c->get(AdminService::class),

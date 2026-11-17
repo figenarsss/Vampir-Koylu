@@ -5,6 +5,9 @@
 - Gereksinimler ve kurallar: [docs/srs.md](docs/srs.md)
 - Mimari, veritabanı ve tasarım kararları: [docs/tasarim.md](docs/tasarim.md); kodda nasıl uygulandığı ve tasarımdan farkları: [docs/uygulama-notlari.md](docs/uygulama-notlari.md)
 - Test raporu: [docs/test-raporu.md](docs/test-raporu.md)
+- Gereksinim–test eşleşmesi: [docs/izlenebilirlik.md](docs/izlenebilirlik.md)
+- Oyunun nasıl oynandığı (oyuncu ve yönetici rehberi): [docs/kullanici-rehberi.md](docs/kullanici-rehberi.md)
+- Süreç raporu: [docs/surec-raporu.md](docs/surec-raporu.md)
 - Yapay zekâ kullanım kayıtları: [docs/ai-gunlugu.md](docs/ai-gunlugu.md)
 
 ## Özellikler
@@ -34,7 +37,7 @@ composer install
 
 ### 2. Depolamayı seçin
 
-Varsayılan depolama JSON'dır; ek ayar gerekmez. Örnek veriyi yükleyin:
+Varsayılan depolama JSON'dır; ek ayar gerekmez. Veriler `storage/veri/` altında her tablo için `<ad>.json` (ve kilit dosyası `<ad>.json.lock`) olarak tutulur; yazma işlemi önce geçici dosyaya yapılıp `rename` ile asıl dosyanın yerine geçirilir. Başlangıç verisi betiği `bin/ornek-veri.php` dosyasıdır (`bin/seed.php` yerine bu ad kullanılır). Örnek veriyi yükleyin:
 
 ```bash
 php bin/ornek-veri.php

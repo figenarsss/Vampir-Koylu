@@ -28,6 +28,7 @@ final readonly class GameRules
         $defaults = new self();
 
         return new self(
+            minPlayers: $sureler['min_oyuncu'] ?? $defaults->minPlayers,
             nightSeconds: $sureler['gece'] ?? $defaults->nightSeconds,
             nightSelectionSeconds: $sureler['gece_secim'] ?? $defaults->nightSelectionSeconds,
             daySeconds: $sureler['gunduz'] ?? $defaults->daySeconds,

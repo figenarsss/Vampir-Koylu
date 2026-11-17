@@ -21,6 +21,7 @@ final class JsonRepositoryFactory
             new JsonVoteRepository($storage),
             new JsonGameLogRepository($storage),
             new JsonReportRepository($storage),
+            new JsonMessageRepository($storage),
             new JsonTransactionManager($storage),
         );
     }

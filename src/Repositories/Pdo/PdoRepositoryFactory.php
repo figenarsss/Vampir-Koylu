@@ -20,6 +20,7 @@ final class PdoRepositoryFactory
             new PdoVoteRepository($pdo),
             new PdoGameLogRepository($pdo),
             new PdoReportRepository($pdo),
+            new PdoMessageRepository($pdo),
             new PdoTransactionManager($pdo),
         );
     }

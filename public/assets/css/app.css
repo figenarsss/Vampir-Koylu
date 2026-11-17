@@ -92,3 +92,27 @@ body {
         padding: 0.85rem 1rem;
     }
 }
+
+/* Sohbet */
+.chat-list {
+    max-height: 18rem;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+
+.chat-msg {
+    padding: 0.3rem 0.6rem;
+    margin-bottom: 0.35rem;
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    word-break: break-word;
+}
+
+.chat-msg.chat-me {
+    background: rgba(220, 53, 69, 0.18);
+}
+
+.chat-meta {
+    font-size: 0.75rem;
+    color: var(--bs-secondary-color, #9aa0a6);
+}

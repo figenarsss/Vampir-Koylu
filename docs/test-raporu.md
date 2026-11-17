@@ -14,6 +14,8 @@ Tarih: 2026-11-08 · Kapsam: Aşama 3 (MySQL ile çalışan tam ürün)
 
 Aynı 158 test üç farklı depolamada geçtiği için iki repository uygulaması (JSON ve PDO) birbirinin yerine kullanılabilir, MySQL katmanı da gerçek sunucuda doğrulanmıştır.
 
+**Güncelleme (2026-11-11):** JSON yazma katmanı yönergedeki "geçici dosyaya yaz, sonra değiştir" kuralına uyacak şekilde düzeltildi (`JsonTable`) ve `tests/Repositories/JsonTableTest.php` içine 8 test eklendi. Güncel sayı: **166 test, 643 doğrulama**; `vendor/bin/phpunit` ve `vendor/bin/phpunit -c phpunit.json.xml` çalıştırmalarının ikisinde de hepsi geçti (PHP 8.3.6, Linux). Yukarıdaki 158'lik ilk ölçümler ve süreler 2026-11-08 tarihlidir; MariaDB sonuçları (158 test) bu değişiklikten önce alınmıştır ve yeniden çalıştırılmadı.
+
 **Ekibin test planına göre durum** (SRS bölüm 8, 33 senaryo): **33 senaryonun hepsi karşılanıyor.** Ayrıntı bölüm 3'te.
 
 ## 2. Test ortamı

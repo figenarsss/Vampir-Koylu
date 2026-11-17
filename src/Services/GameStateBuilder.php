@@ -35,6 +35,7 @@ final class GameStateBuilder
         private readonly NightHistory $history,
         private readonly Clock $clock,
         private readonly GameRules $rules,
+        private readonly ChatService $chat,
     ) {
     }
 
@@ -68,6 +69,7 @@ final class GameStateBuilder
                     'emoji' => $game->winnerTeam->emoji(),
                 ],
                 'player_count' => count($players),
+                'rematch_code' => $game->rematchCode,
                 'min_players' => $this->rules->minPlayers,
                 'max_players' => $this->rules->maxPlayers,
                 'vampire_count' => $game->status === GameStatus::Lobby ? null : $game->vampireCount,
@@ -92,6 +94,7 @@ final class GameStateBuilder
             'trap_notes' => $this->trapNotes($me, $phase, $finished),
             'announcements' => $this->announcements($game),
             'report' => $finished ? $this->report($game) : null,
+            'chat' => $this->chatPanel($game, $me),
         ];
 
         $state['signature'] = $this->signature($state);
@@ -323,6 +326,26 @@ final class GameStateBuilder
         );
     }
 
+    private function chatPanel(Game $game, Player $me): array
+    {
+        $blocked = $this->chat->blockReason($game, $me);
+
+        return [
+            'can_send' => $blocked === null,
+            'blocked_reason' => $blocked,
+            'max_length' => ChatService::MAX_LENGTH,
+            'messages' => array_map(
+                static fn ($m): array => [
+                    'name' => $m->userName,
+                    'is_me' => $m->userId === $me->userId,
+                    'time' => $m->createdAt->format('H:i'),
+                    'text' => $m->body,
+                ],
+                $this->chat->recent($game),
+            ),
+        ];
+    }
+
     private function signature(array $state): string
     {
         $game = $state['game'];
@@ -336,6 +359,8 @@ final class GameStateBuilder
             (int) $state['me']['alive'],
             $state['night']['chosen_id'] ?? 0,
             (int) ($state['vote']['has_voted'] ?? false),
+            (int) $state['chat']['can_send'],
+            $state['game']['rematch_code'] ?? '',
             $lobby ? $game['player_count'] : 0,
             $lobby ? $state['settings']['vampires'] . '-' . $state['settings']['trappers'] : '',
         ]);

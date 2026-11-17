@@ -75,7 +75,32 @@ final class RoomController extends GameAwareController
     {
         $game = $this->findGame($request);
 
-        return $this->attempt($request, '/', 'Odadan ayrıldınız.', fn () => $this->lobby->leave($game, $request->user));
+        try {
+            $message = $this->lobby->leave($game, $request->user);
+        } catch (RuleViolationException $error) {
+            $request->session->flash('error', $error->getMessage());
+
+            return $this->redirect($request, "/oyun/{$game->roomCode}");
+        }
+        $request->session->flash('success', $message);
+
+        return $this->redirect($request, '/');
+    }
+
+    public function rematch(Request $request): Response
+    {
+        $game = $this->findGame($request);
+
+        try {
+            $next = $this->lobby->rematch($game, $request->user);
+        } catch (RuleViolationException $error) {
+            $request->session->flash('error', $error->getMessage());
+
+            return $this->redirect($request, "/oyun/{$game->roomCode}");
+        }
+        $request->session->flash('success', "Yeni lobiye geçtin. Oda kodu: {$next->roomCode}");
+
+        return $this->redirect($request, "/oyun/{$next->roomCode}");
     }
 
     public function kick(Request $request): Response

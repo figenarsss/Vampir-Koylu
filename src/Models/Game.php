@@ -18,6 +18,7 @@ final readonly class Game
         public ?Team $winnerTeam,
         public int $version,
         public DateTimeImmutable $createdAt,
+        public ?string $rematchCode = null,
     ) {
     }
 
@@ -33,6 +34,7 @@ final readonly class Game
             isset($row['winner_team']) ? Team::from((string) $row['winner_team']) : null,
             (int) $row['version'],
             new DateTimeImmutable((string) $row['created_at']),
+            isset($row['rematch_code']) && $row['rematch_code'] !== '' ? (string) $row['rematch_code'] : null,
         );
     }
 

@@ -20,6 +20,7 @@ final class JsonGameRepository implements GameRepositoryInterface
     private readonly JsonTable $actions;
     private readonly JsonTable $votes;
     private readonly JsonTable $logs;
+    private readonly JsonTable $messages;
 
     public function __construct(JsonStorage $storage)
     {
@@ -30,6 +31,7 @@ final class JsonGameRepository implements GameRepositoryInterface
         $this->actions = $storage->table('actions');
         $this->votes = $storage->table('votes');
         $this->logs = $storage->table('game_logs');
+        $this->messages = $storage->table('messages');
     }
 
     public function create(string $roomCode, int $hostUserId, DateTimeImmutable $createdAt): Game
@@ -41,6 +43,7 @@ final class JsonGameRepository implements GameRepositoryInterface
             'vampire_count' => 0,
             'trapper_count' => 0,
             'winner_team' => null,
+            'rematch_code' => null,
             'version' => 0,
             'created_at' => DbDate::format($createdAt),
         ]));
@@ -110,6 +113,24 @@ final class JsonGameRepository implements GameRepositoryInterface
         $this->games->update($id, ['status' => GameStatus::Finished->value, 'winner_team' => $winner->value]);
     }
 
+    public function setHost(int $id, int $hostUserId): void
+    {
+        $this->games->update($id, ['host_user_id' => $hostUserId]);
+    }
+
+    public function claimRematchCode(int $id, ?string $expected, string $newCode): bool
+    {
+        return $this->games->mutate(static function (array &$data) use ($id, $expected, $newCode): bool {
+            $current = $data['rows'][$id]['rematch_code'] ?? null;
+            if (!isset($data['rows'][$id]) || $current !== $expected) {
+                return false;
+            }
+            $data['rows'][$id]['rematch_code'] = $newCode;
+
+            return true;
+        });
+    }
+
     public function delete(int $id): void
     {
         $phaseIds = array_column($this->phases->where(static fn (array $row): bool => (int) $row['game_id'] === $id), 'id');
@@ -119,6 +140,7 @@ final class JsonGameRepository implements GameRepositoryInterface
         $this->phases->deleteWhere(static fn (array $row): bool => (int) $row['game_id'] === $id);
         $this->players->deleteWhere(static fn (array $row): bool => (int) $row['game_id'] === $id);
         $this->logs->deleteWhere(static fn (array $row): bool => (int) $row['game_id'] === $id);
+        $this->messages->deleteWhere(static fn (array $row): bool => (int) $row['game_id'] === $id);
         $this->games->deleteWhere(static fn (array $row): bool => (int) $row['id'] === $id);
     }
 

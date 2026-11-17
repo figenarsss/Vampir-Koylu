@@ -131,32 +131,6 @@ Her gece çözümünden ve her oylamadan sonra kazanan kontrol edilir. Hayatta v
 
 Gece eylemleri sunucuda sabit bir sırayla çözülür: tuzakçı, vampir, doktor, kâhin. Tuzağa takılan eylem iptal olur. Sonuçlar sabaha kadar gizli tutulur ve sabah toplu açıklanır.
 
-## 2. Kapsam dışı
-
-- Oyun içi sohbet yoktur. Tartışma oyuncular arasında oyun dışında yapılır.
-- Bilgisayar (bot) oyuncular yoktur.
-- Ek roller isteğe bağlıdır. Tuzakçı rolü bu sürümde uygulanmayacaktır.
-
-## 3. Çekirdek problem
-
-### 3.1 Faz durum makinesi
-
-Oyun lobi, gece, gündüz, oylama ve bitiş fazlarından geçer. Her fazın bir süresi vardır ve süre dolunca fazı sunucu ilerletir. Tarayıcıdan gelen süre veya faz bilgisine güvenilmez. Oylama fazı, herkes oy kullanınca süre dolmadan da biter. Aynı fazın iki eşzamanlı istekle iki kez ilerletilmemesi gerekir.
-
-### 3.2 Role özel gizli bilgi
-
-Hiçbir oyuncu başkasının rolünü sunucu yanıtından öğrenememelidir. Aynı sunucu adresi her oyuncuya farklı veri döndürür. Vampir yalnızca diğer vampirleri, kâhin ise yalnızca baktığı kişinin rolünü ek olarak görür. Ölü oyuncular (hayaletler) gizli rolleri göremez.
-
-### 3.3 Oylama sayımı ve eşitlik kuralı
-
-Gündüz oyuncular oy verir veya pas geçer. En çok oyu alan oyuncu elenir. Eşit oyda veya en çok oyu pas aldığında kimse elenmez ve oyun geceye geçer. Gece vampir oylamasında eşitlik çıkarsa o gece kimse ölmez.
-
-### 3.4 Kazanma koşulu denetimi
-
-Her gece sonucundan ve her oylamadan sonra kazanan kontrol edilir. Tüm vampirler elenirse köylüler, canlı vampir sayısı canlı köylü tarafının sayısına eşit olursa vampirler kazanır.
-
-## 4. Kullanıcı hikâyeleri
-
 ## 4. Kullanıcı hikayeleri
 
 ### US-1 · Kayıt, giriş ve çıkış
@@ -409,7 +383,7 @@ Her gece sonucundan ve her oylamadan sonra kazanan kontrol edilir. Tüm vampirle
 | NFR-4 | Çekirdek problem için en az 5 PHPUnit testi bulunmalı ve tümü başarıyla geçmelidir. | phpunit çalıştırılır, başarısız test sayısı 0 olmalıdır. | US-11 |
 | NFR-5 | Aynı oylamada aynı oyuncudan gelen 2. ve sonraki oy girişimlerinin %100'ü reddedilmelidir; votes tablosunda oyuncu başına oy sayısı 1'i geçmemelidir. | Aynı oyuncudan birden fazla oy isteği atılır, votes tablosu sorgulanır. | US-9 |
 | NFR-6 | Aynı faza aynı anda gelen birden fazla ilerletme isteğinden yalnızca 1'i fazı ilerletmelidir; faz geçiş sayısı faz başına 1'i geçmemelidir. | Eş zamanlı 10 istek gönderilir, günlükteki faz geçişleri sayılır. | US-5 |
-| NFR-7 | Kâhin dışındaki bir oyuncunun API yanıtlarında başka bir oyuncunun gizli rolü bulunmamalıdır; sızan rol sayısı 0 olmalıdır. | Her rolle giriş yapılıp tüm uç nokta yanıtları taranır.
+| NFR-7 | Kâhin dışındaki bir oyuncunun API yanıtlarında başka bir oyuncunun gizli rolü bulunmamalıdır; sızan rol sayısı 0 olmalıdır. | Her rolle giriş yapılıp tüm uç nokta yanıtları taranır. | US-7 |
 
 ## 7. Kullanım senaryoları (use-case)
 
@@ -521,6 +495,8 @@ flowchart TB
 ```
 
 ## 8. İzlenebilirlik tablosu
+
+> Güncel eşleşme (kodda gerçekten bulunan test adlarıyla): [izlenebilirlik.md](izlenebilirlik.md). Aşağıdaki tablo Aşama 1'deki test planıdır; test adları kodda değişmiştir.
 
 # Gereksinim–Test İzlenebilirlik Tablosu
 
