@@ -82,6 +82,22 @@ final class PdoGameRepository extends PdoRepository implements GameRepositoryInt
         );
     }
 
+    public function setHost(int $id, int $hostUserId): void
+    {
+        $this->execute('UPDATE games SET host_user_id = ? WHERE id = ?', [$hostUserId, $id]);
+    }
+
+    public function claimRematchCode(int $id, ?string $expected, string $newCode): bool
+    {
+        if ($expected === null) {
+            $changed = $this->execute('UPDATE games SET rematch_code = ? WHERE id = ? AND rematch_code IS NULL', [$newCode, $id]);
+        } else {
+            $changed = $this->execute('UPDATE games SET rematch_code = ? WHERE id = ? AND rematch_code = ?', [$newCode, $id, $expected]);
+        }
+
+        return $changed === 1;
+    }
+
     public function delete(int $id): void
     {
         $this->execute('DELETE FROM games WHERE id = ?', [$id]);

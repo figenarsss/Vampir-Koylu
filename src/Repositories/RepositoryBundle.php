@@ -15,6 +15,7 @@ final readonly class RepositoryBundle
         public VoteRepositoryInterface $votes,
         public GameLogRepositoryInterface $logs,
         public ReportRepositoryInterface $reports,
+        public MessageRepositoryInterface $messages,
         public TransactionManagerInterface $transactions,
     ) {
     }

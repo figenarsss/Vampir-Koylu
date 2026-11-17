@@ -6,7 +6,9 @@ namespace VampirKoylu\Repositories\Json;
 
 use RuntimeException;
 
-// flock ile okuma ve yazma
+// Okuma ve yazma ayrı bir kilit dosyası (.lock) üzerinden flock ile korunur.
+// Yazma doğrudan asıl dosyaya yapılmaz: veri önce geçici dosyaya yazılır, sonra rename ile
+// asıl dosyanın yerine geçirilir. Böylece yazma yarıda kesilse bile asıl dosya bozulmaz.
 final class JsonTable
 {
     public function __construct(private readonly string $path)
@@ -17,7 +19,7 @@ final class JsonTable
     {
         $handle = $this->open(LOCK_SH);
         try {
-            return array_values($this->read($handle)['rows']);
+            return array_values($this->read()['rows']);
         } finally {
             $this->close($handle);
         }
@@ -27,7 +29,7 @@ final class JsonTable
     {
         $handle = $this->open(LOCK_SH);
         try {
-            return $this->read($handle)['rows'][$id] ?? null;
+            return $this->read()['rows'][$id] ?? null;
         } finally {
             $this->close($handle);
         }
@@ -68,13 +70,9 @@ final class JsonTable
     {
         $handle = $this->open(LOCK_EX);
         try {
-            $data = $this->read($handle);
+            $data = $this->read();
             $result = $change($data);
-
-            rewind($handle);
-            ftruncate($handle, 0);
-            fwrite($handle, json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
-            fflush($handle);
+            $this->write($data);
 
             return $result;
         } finally {
@@ -82,29 +80,68 @@ final class JsonTable
         }
     }
 
+    /**
+     * Kilit dosyasını açar ve kilidi alır. Asıl veri dosyası yazma sırasında
+     * yer değiştirdiği için kilit asıl dosyada değil, ayrı bir dosyada tutulur.
+     *
+     * @return resource
+     */
     private function open(int $lockType)
     {
-        $handle = fopen($this->path, 'c+');
+        $handle = fopen($this->path . '.lock', 'c');
         if ($handle === false) {
-            throw new RuntimeException("Veri dosyası açılamadı: {$this->path}");
+            throw new RuntimeException("Kilit dosyası açılamadı: {$this->path}.lock");
         }
-        flock($handle, $lockType);
+        if (!flock($handle, $lockType)) {
+            fclose($handle);
+            throw new RuntimeException("Kilit alınamadı: {$this->path}.lock");
+        }
 
         return $handle;
     }
 
+    /** @param resource $handle */
     private function close($handle): void
     {
         flock($handle, LOCK_UN);
         fclose($handle);
     }
 
-    private function read($handle): array
+    private function read(): array
     {
-        rewind($handle);
-        $raw = stream_get_contents($handle);
-        $data = ($raw === false || $raw === '') ? null : json_decode($raw, true);
+        if (!is_file($this->path)) {
+            return ['next_id' => 1, 'rows' => []];
+        }
 
-        return is_array($data) ? $data : ['next_id' => 1, 'rows' => []];
+        $raw = file_get_contents($this->path);
+        if ($raw === false) {
+            throw new RuntimeException("Veri dosyası okunamadı: {$this->path}");
+        }
+        if (trim($raw) === '') {
+            return ['next_id' => 1, 'rows' => []];
+        }
+
+        $data = json_decode($raw, true);
+        if (!is_array($data) || !isset($data['next_id'], $data['rows']) || !is_array($data['rows'])) {
+            // Bozuk dosya sessizce boş sayılmaz; aksi halde sonraki yazma tüm veriyi silerdi.
+            throw new RuntimeException("Veri dosyası bozuk veya geçersiz: {$this->path}");
+        }
+
+        return $data;
+    }
+
+    private function write(array $data): void
+    {
+        $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
+        $temp = $this->path . '.' . bin2hex(random_bytes(6)) . '.tmp';
+
+        if (file_put_contents($temp, $json, LOCK_EX) === false) {
+            @unlink($temp);
+            throw new RuntimeException("Geçici veri dosyası yazılamadı: {$temp}");
+        }
+        if (!rename($temp, $this->path)) {
+            @unlink($temp);
+            throw new RuntimeException("Veri dosyası değiştirilemedi: {$this->path}");
+        }
     }
 }

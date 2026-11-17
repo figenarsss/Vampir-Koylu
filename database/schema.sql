@@ -32,6 +32,7 @@ CREATE TABLE games (
     vampire_count INT         NOT NULL DEFAULT 0,
     trapper_count INT         NOT NULL DEFAULT 0,
     winner_team   VARCHAR(10) NULL,
+    rematch_code  VARCHAR(6)  NULL,
     version       INT         NOT NULL DEFAULT 0,
     created_at    DATETIME    NOT NULL,
     CONSTRAINT uq_games_room_code UNIQUE (room_code),
@@ -110,6 +111,17 @@ CREATE TABLE game_logs (
     CONSTRAINT fk_logs_game FOREIGN KEY (game_id) REFERENCES games (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- oda sohbeti (oyun silinince mesajlar da silinir)
+CREATE TABLE messages (
+    id         INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    game_id    INT          NOT NULL,
+    user_id    INT          NOT NULL,
+    body       VARCHAR(300) NOT NULL,
+    created_at DATETIME     NOT NULL,
+    CONSTRAINT fk_messages_game FOREIGN KEY (game_id) REFERENCES games (id) ON DELETE CASCADE,
+    CONSTRAINT fk_messages_user FOREIGN KEY (user_id) REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- id değerleri src/Models/RoleType.php ile aynı olmalı
 INSERT INTO roles (id, name, team, night_action, description) VALUES
     (1, 'villager', 'villagers', NULL,      'Gece yeteneği yoktur. Gündüz oylamada vampirleri bulmaya çalışır.'),
@@ -119,5 +131,6 @@ INSERT INTO roles (id, name, team, night_action, description) VALUES
     (5, 'trapper',  'villagers', 'trap',    'Her gece bir oyuncunun evine tuzak kurar. Eve eylem yapan ilk oyuncunun eylemi iptal olur.');
 
 CREATE INDEX idx_game_logs_game ON game_logs (game_id, id);
+CREATE INDEX idx_messages_game ON messages (game_id, id);
 CREATE INDEX idx_games_status ON games (status);
 CREATE INDEX idx_players_user ON players (user_id);

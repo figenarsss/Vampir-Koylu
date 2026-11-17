@@ -9,6 +9,7 @@ use VampirKoylu\Exceptions\RuleViolationException;
 use VampirKoylu\Game\GameRules;
 use VampirKoylu\Models\Game;
 use VampirKoylu\Models\GameStatus;
+use VampirKoylu\Models\Player;
 use VampirKoylu\Models\User;
 use VampirKoylu\Repositories\GameRepositoryInterface;
 use VampirKoylu\Repositories\PlayerRepositoryInterface;
@@ -67,17 +68,82 @@ final class LobbyService
         return $game;
     }
 
-    public function leave(Game $game, User $user): void
+    /**
+     * Lobiden ayrılır. Kurucu ayrılırsa kurucu yetkisi en erken katılan diğer oyuncuya geçer;
+     * odada kimse kalmazsa oda kapanır (silinir). Kullanıcıya gösterilecek mesajı döndürür.
+     */
+    public function leave(Game $game, User $user): string
     {
-        $this->requireLobby($game);
-        if ($game->isHost($user)) {
-            throw new RuleViolationException('Oda kurucusu odadan ayrılamaz; odayı silebilir.');
-        }
+        return $this->transactions->run(function () use ($game, $user): string {
+            $this->requireLobby($game);
 
-        $player = $this->players->findByGameAndUser($game->id, $user->id);
-        if ($player !== null) {
+            $player = $this->players->findByGameAndUser($game->id, $user->id);
+            if ($player === null) {
+                return 'Odadan ayrıldınız.';
+            }
+            if (!$game->isHost($user)) {
+                $this->players->remove($player->id);
+
+                return 'Odadan ayrıldınız.';
+            }
+
+            $others = array_values(array_filter(
+                $this->players->listByGame($game->id),
+                static fn (Player $p): bool => $p->id !== $player->id,
+            ));
+            if ($others === []) {
+                $this->games->delete($game->id);
+
+                return 'Odadan ayrıldınız. Odada kimse kalmadığı için oda kapandı.';
+            }
+
+            $this->games->setHost($game->id, $others[0]->userId);
             $this->players->remove($player->id);
-        }
+
+            return "Odadan ayrıldınız. Oda kurucusu {$others[0]->name} oldu.";
+        });
+    }
+
+    /**
+     * Biten oyundan sonra herkesi yeni bir lobide toplar. İlk tıklayan yeni odayı açar ve kurucusu olur;
+     * sonrakiler aynı odaya katılır. Biten oyun, kayıtlarıyla birlikte geçmişte kalır.
+     */
+    public function rematch(Game $old, User $user): Game
+    {
+        return $this->transactions->run(function () use ($old, $user): Game {
+            $old = $this->games->findById($old->id) ?? throw new RuleViolationException('Oda bulunamadı.');
+            if ($old->status !== GameStatus::Finished) {
+                throw new RuleViolationException('Yeni lobiye yalnızca oyun bittikten sonra geçilebilir.');
+            }
+            if ($this->players->findByGameAndUser($old->id, $user->id) === null) {
+                throw new ForbiddenException('Bu oyunun oyuncusu değilsiniz.');
+            }
+
+            if ($old->rematchCode !== null) {
+                $next = $this->games->findByCode($old->rematchCode);
+                if ($next !== null) {
+                    if ($next->status !== GameStatus::Lobby && $this->players->findByGameAndUser($next->id, $user->id) === null) {
+                        throw new RuleViolationException('Yeni oyun başlamış; katılamazsın.');
+                    }
+
+                    return $this->join($next->roomCode, $user);
+                }
+            }
+
+            $created = $this->createRoom($user);
+            if (!$this->games->claimRematchCode($old->id, $old->rematchCode, $created->roomCode)) {
+                // aynı anda başka biri yeni lobiyi açtı: onunkine katıl, kendi odamızı sil
+                $this->games->delete($created->id);
+                $fresh = $this->games->findById($old->id);
+                if ($fresh?->rematchCode === null) {
+                    throw new RuleViolationException('Yeni lobi açılamadı; tekrar deneyin.');
+                }
+
+                return $this->join($fresh->rematchCode, $user);
+            }
+
+            return $created;
+        });
     }
 
     public function kick(Game $game, User $host, int $playerId): void

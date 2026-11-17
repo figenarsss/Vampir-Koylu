@@ -93,11 +93,18 @@ $postUrl = static fn (string $action): string => $url("/oyun/{$code}/{$action}")
                             <?php if ($game['player_count'] < $game['min_players']): ?>
                                 <span class="text-secondary ms-2">En az <?= $e($game['min_players']) ?> oyuncu gerekli.</span>
                             <?php endif; ?>
-                            <form method="post" action="<?= $e($postUrl('sil')) ?>" class="d-inline float-end"
-                                  onsubmit="return confirm('Oda silinsin mi? Bu işlem geri alınamaz.');">
-                                <?= $csrf() ?>
-                                <button class="btn btn-outline-secondary btn-sm">🗑️ Odayı sil</button>
-                            </form>
+                            <div class="mt-3 d-flex flex-wrap gap-2">
+                                <form method="post" action="<?= $e($postUrl('ayril')) ?>"
+                                      onsubmit="return confirm('Odadan ayrılırsan kurucu yetkisi sıradaki oyuncuya geçer. Odada kimse kalmazsa oda kapanır. Ayrılıyor musun?');">
+                                    <?= $csrf() ?>
+                                    <button class="btn btn-outline-secondary btn-sm">🚪 Odadan ayrıl</button>
+                                </form>
+                                <form method="post" action="<?= $e($postUrl('sil')) ?>"
+                                      onsubmit="return confirm('Oda silinsin mi? Bu işlem geri alınamaz.');">
+                                    <?= $csrf() ?>
+                                    <button class="btn btn-outline-secondary btn-sm">🗑️ Odayı sil</button>
+                                </form>
+                            </div>
                         <?php else: ?>
                             <p class="mb-2">⚙️ Rol ayarı: <?= $e($settings['vampires']) ?> vampir, <?= $e($settings['trappers']) ?> tuzakçı.</p>
                             <p class="mb-2">⏳ Oda kurucusunun oyunu başlatması bekleniyor...</p>
@@ -141,7 +148,7 @@ $postUrl = static fn (string $action): string => $url("/oyun/{$code}/{$action}")
                 <section class="card game-card mb-3">
                     <div class="card-body">
                         <h2 class="h5">☀️ Gündüz</h2>
-                        <p class="mb-0">Sabah duyurusu aşağıdaki günlükte. Uygulamada sohbet yoktur; tartışmayı oyun dışında yapın.
+                        <p class="mb-0">Sabah duyurusu aşağıdaki günlükte. Şüphelerinizi sağdaki sohbetten tartışabilirsiniz.
                            Süre dolunca oylama başlayacak.</p>
                     </div>
                 </section>
@@ -195,7 +202,13 @@ $postUrl = static fn (string $action): string => $url("/oyun/{$code}/{$action}")
                     <div class="card-body text-center">
                         <div class="display-3"><?= $e($game['winner']['emoji'] ?? '🏁') ?></div>
                         <h2 class="h3 mt-2">Oyun bitti: <?= $e($game['winner']['label'] ?? '') ?> kazandı!</h2>
-                        <p class="text-secondary mb-3">Tüm roller sağdaki listede açıklandı. Olayların tam özeti aşağıda.</p>
+                        <p class="text-secondary mb-3">Tüm roller sağdaki listede açıklandı. Olayların tam özeti aşağıda.
+                           Sohbet açık; yeni oyun için hep birlikte lobiye dönebilirsiniz.</p>
+                        <form method="post" action="<?= $e($postUrl('tekrar')) ?>" class="d-inline">
+                            <?= $csrf() ?>
+                            <button class="btn btn-danger">🔁 Lobiye dön<?= $game['rematch_code'] !== null ? ' (yeni lobi hazır)' : '' ?></button>
+                        </form>
+                        <a class="btn btn-outline-secondary btn-sm" href="<?= $e($url('/')) ?>">Ana sayfaya dön</a>
                         <?php if ($me['is_host']): ?>
                             <form method="post" action="<?= $e($postUrl('sil')) ?>" class="d-inline"
                                   onsubmit="return confirm('Oda ve oyun kayıtları silinsin mi? Bu işlem geri alınamaz.');">
@@ -203,7 +216,6 @@ $postUrl = static fn (string $action): string => $url("/oyun/{$code}/{$action}")
                                 <button class="btn btn-outline-secondary btn-sm">🗑️ Odayı sil</button>
                             </form>
                         <?php endif; ?>
-                        <a class="btn btn-danger btn-sm" href="<?= $e($url('/')) ?>">Ana sayfaya dön</a>
                     </div>
                 </section>
             <?php endif; ?>
@@ -284,6 +296,35 @@ $postUrl = static fn (string $action): string => $url("/oyun/{$code}/{$action}")
                             </li>
                         <?php endforeach; ?>
                     </ul>
+                </div>
+            </section>
+
+            <?php $chat = $state['chat']; ?>
+            <section class="card game-card mt-3" id="sohbet-kart">
+                <div class="card-body">
+                    <h2 class="h5">💬 Sohbet</h2>
+                    <div id="sohbet-liste" data-canli class="chat-list mb-2">
+                        <?php if ($chat['messages'] === []): ?>
+                            <p class="text-secondary small mb-0">Henüz mesaj yok.</p>
+                        <?php endif; ?>
+                        <?php foreach ($chat['messages'] as $message): ?>
+                            <div class="chat-msg <?= $message['is_me'] ? 'chat-me' : '' ?>">
+                                <span class="chat-meta"><?= $e($message['time']) ?> · <strong><?= $e($message['name']) ?></strong></span>
+                                <div><?= $e($message['text']) ?></div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div id="sohbet-hata" class="text-danger small mb-1" role="alert"></div>
+                    <?php if ($chat['can_send']): ?>
+                        <form method="post" action="<?= $e($postUrl('mesaj')) ?>" class="sohbet-form d-flex gap-2" autocomplete="off">
+                            <?= $csrf() ?>
+                            <input type="text" name="mesaj" class="form-control form-control-sm" maxlength="<?= $e($chat['max_length']) ?>"
+                                   placeholder="Mesaj yaz..." aria-label="Mesaj" required>
+                            <button class="btn btn-sm btn-danger">Gönder</button>
+                        </form>
+                    <?php else: ?>
+                        <p class="text-secondary small mb-0">🔒 <?= $e($chat['blocked_reason']) ?></p>
+                    <?php endif; ?>
                 </div>
             </section>
         </div>

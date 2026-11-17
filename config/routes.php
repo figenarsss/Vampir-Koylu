@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use VampirKoylu\Controllers\AdminController;
 use VampirKoylu\Controllers\AuthController;
+use VampirKoylu\Controllers\ChatController;
 use VampirKoylu\Controllers\GameController;
 use VampirKoylu\Controllers\HistoryController;
 use VampirKoylu\Controllers\HomeController;
@@ -31,6 +32,8 @@ return static function (Router $router): void {
     $router->post('/oyun/{code}/at', [RoomController::class, 'kick'], ['auth']);
     $router->post('/oyun/{code}/ayar', [RoomController::class, 'settings'], ['auth']);
     $router->post('/oyun/{code}/sil', [RoomController::class, 'delete'], ['auth']);
+    $router->post('/oyun/{code}/tekrar', [RoomController::class, 'rematch'], ['auth']);
+    $router->post('/oyun/{code}/mesaj', [ChatController::class, 'send'], ['auth']);
 
     // Oyun
     $router->get('/oyun/{code}', [GameController::class, 'show'], ['auth']);

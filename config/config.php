@@ -27,5 +27,5 @@ return [
     ],
 
     // ['gece' => 25, 'gece_secim' => 15, 'gunduz' => 75, 'oylama' => 30]
-    'sureler' => [],
+    'sureler' => ['min_oyuncu' => 3],
 ];
