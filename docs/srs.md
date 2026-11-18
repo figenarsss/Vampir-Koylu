@@ -57,7 +57,7 @@ Vampir sayısı en fazla 3'tür. 8 oyuncudan azsa tam 1 vampir bulunur.
 | Oylama | En fazla 30 sn | Herkes oy kullanınca süre dolmadan biter.                                                        |
 | Bitiş  | ,              | Kazanan açıklanır.                                                                               |
 
-Gece, gündüz ve oylama kazanan çıkana kadar sırayla tekrarlanır. Süre dolunca fazı sunucu ilerletir. Uygulamada sohbet yoktur.
+Gece, gündüz ve oylama kazanan çıkana kadar sırayla tekrarlanır. Süre dolunca fazı sunucu ilerletir. Oyun içi sohbet gece kapalıdır, diğer fazlarda açıktır.
 
 #### 1.4.4 Gece
 
@@ -105,8 +105,7 @@ tuzakçı) sayısına eşit olunca.
 
 ## 2. Kapsam dışı
 
-- Oyun içi sohbet yoktur. Tartışma uygulama dışında yapılır.
-- Bot (bilgisayar) oyuncular yoktur.
+- Sesli veya görüntülü sohbet, özel (birebir) mesajlaşma ve mesaj geçmişinin oyun sonrasında dışa aktarılması yoktur. Metin tabanlı oda sohbeti kapsamdadır
 
 
 ## 3. Çekirdek problem
@@ -201,8 +200,7 @@ Gece eylemleri sunucuda sabit bir sırayla çözülür: tuzakçı, vampir, dokto
 - [ ] Erken istek ya da değiştirilmiş istemci süresi fazı erkene alamaz
 - [ ] Eş zamanlı birden fazla istek gelse de faz yalnızca bir kez ilerler (PDO transaction, NFR-6)
 - [ ] Gündüz fazında uygulama içi sohbet yoktur; tartışma uygulama dışında yapılır
-- [ ] Her faz değişimi günlüğe yazılır
-
+- [ ] Gündüz fazında oda sohbeti açıktır; gece fazında kapalıdır
 ### US-6 · Gece eylemleri
 
 **Hikaye:** Vampir, doktor, kâhin ve tuzakçı olarak, gecenin ilk 15 saniyesinde eylemimi seçmek istiyorum, böylece rolümün görevini yapabilirim.
@@ -352,6 +350,45 @@ Gece eylemleri sunucuda sabit bir sırayla çözülür: tuzakçı, vampir, dokto
 - [ ] Gizli gece eylemleri oyun bitene kadar günlükte görünmez
 - [ ] Günlük canlı oyuncular ve hayaletler tarafından görülebilir
 
+### US-17 · Oyun içi sohbet
+Hikaye: Oyuncu olarak, gündüz ve oylama sırasında odadaki diğer oyuncularla yazışmak istiyorum, böylece tartışmayı uygulama içinden yapabilirim.
+
+İlgili gereksinimler: FR-20
+
+Kabul kriterleri:
+
+[ ] Gündüz, oylama, lobi ve oyun bittikten sonra canlı oyuncular mesaj yazabilir
+[ ] Gece fazında sohbet kapalıdır; gece gönderilen mesaj reddedilir ve kaydedilmez
+[ ] Ölen ve elenen oyuncular sohbeti okuyabilir ama yazamaz
+[ ] Odanın oyuncusu olmayan kişi mesaj yazamaz
+[ ] Boş mesaj reddedilir; mesaj en fazla 300 karakter olabilir
+[ ] Mesajlar ekrana HTML olarak değil düz metin olarak basılır (htmlspecialchars)
+[ ] Ekranda yalnızca odanın son 60 mesajı, eskiden yeniye sıralı görünür
+
+### US-18 · Lobiden ayrılma ve kurucu devri
+Hikaye: Oda kurucusu olarak, oyun başlamadan lobiden ayrılabilmek istiyorum, böylece oda kurucusuz kalmaz ve diğer oyuncular oyunu başlatabilir.
+
+İlgili gereksinimler: FR-21
+
+Kabul kriterleri:
+
+[ ] Oyuncu oyun başlamadan lobiden ayrılabilir
+[ ] Kurucu ayrılırsa kurucu yetkisi odaya en erken katılan diğer oyuncuya geçer
+[ ] Odada kimse kalmazsa oda kapanır
+[ ] Oyun başladıktan sonra lobiden ayrılma isteği reddedilir
+### US-19 · Yeni lobi (tekrar oyna)
+
+Hikaye: Oyuncu olarak, oyun bitince aynı arkadaşlarımla yeni bir lobide toplanmak istiyorum, böylece oda kodunu yeniden paylaşmadan tekrar oynayabiliriz.
+
+İlgili gereksinimler: FR-22
+
+Kabul kriterleri:
+
+[ ] Yeni lobiye yalnızca oyun bittikten sonra geçilebilir
+[ ] İlk tıklayan yeni odayı açar ve kurucu olur; diğerleri aynı yeni odaya katılır
+[ ] Biten oyun kayıtlarıyla birlikte geçmişte kalır
+[ ] Yeni oyun başlamışsa sonradan gelen oyuncu katılamaz
+
 ## 5. İşlevsel gereksinimler (FR)
 
 | :--- | :--- | :--- |
@@ -374,7 +411,9 @@ Gece eylemleri sunucuda sabit bir sırayla çözülür: tuzakçı, vampir, dokto
 | FR-17 | Sistem, oda kurucusunun vampir ve tuzakçı sayısını oyuncu sayısına göre sınırlı seçeneklerle ayarlamasını sağlamalı. | US-14 |
 | FR-18 | Sistem, ölen ve elenen oyuncuyu hayalet yapmalı: oyunu izleyebilir, oy veremez, eylem yapamaz, yeni gizli bilgi görmez. | US-15 |
 | FR-19 | Sistem, oyun günlüğüne başlangıcı, faz değişimlerini, gece sonucunu, oylama sonucunu, elemeyi ve bitişi yazmalı; gizli gece eylemlerini oyun bitene kadar göstermemeli. | US-16 |
-
+| FR-20 | Sistem, odadaki oyuncuların lobide, gündüz ve oylama fazlarında ve oyun bittikten sonra metin mesajı yazabilmesini sağlamalı; gece fazında sohbeti kapatmalı, ölen ve elenen oyuncuların yalnızca okumasına izin vermeli, mesajları en fazla 300 karakterle sınırlamalı. | US-17 |
+FR-21 | Sistem, oyun başlamadan lobiden ayrılmayı sağlamalı; kurucu ayrılırsa kurucu yetkisini odaya en erken katılan oyuncuya devretmeli, odada kimse kalmazsa odayı kapatmalı. | US-18 |
+| FR-22 | Sistem, oyun bittikten sonra oyuncuların aynı yeni lobiye geçebilmesini sağlamalı. | US-19 |
 ## 6. İşlevsel olmayan gereksinimler (NFR)
 
 | NFR-1 | 12 oyunculu dolu bir odaya katılmaya çalışan oyuncuya, reddedilme uyarısı en geç 3 saniye içinde ekranda gösterilmelidir. | Dolu odaya katılım isteği atılır, uyarının görünme süresi ölçülür. | US-2 |
@@ -570,3 +609,6 @@ Tür: **B** = PHPUnit birim testi, **E** = entegrasyon/HTTP testi, **M** = manue
 | T-31    | FR-18        | GhostPolicyTest::testGhostRestrictions              | B   | Ölü oyuncu oy ve eylem dener; durumu izler                                               | Oy ve eylem reddedilir; yeni gizli bilgi görmez                                                           | Bekliyor |
 | T-32    | FR-19        | GameLogServiceTest::testLogEntriesAndSecrecy        | B   | Oyun başlar, fazlar geçer, gece/oylama biter; oyun sürerken ve bittiğinde günlük istenir | Olaylar yazılır; gizli gece eylemleri oyun bitene kadar görünmez                                          | Bekliyor |
 | T-33    | NFR-4        | — (komut)                                           | M   | `vendor/bin/phpunit` çalıştır                                                            | Başarısız test sayısı 0; çekirdek problem için B türündeki test sayısı hedefin üzerinde                   | Bekliyor |
+T-34 | FR-20 | ChatServiceTest (13 test) | B | Gece, gündüz, oylama, elenen oyuncu, boş ve 301 karakterlik mesaj, odada olmayan kişi, son 60 mesaj | Gece, elenen ve yabancı oyuncunun mesajı reddedilir; diğer durumlarda mesaj kaydedilir | Geçti |
+| T-35 | FR-21 | LobbyServiceTest (yazılacak: leave testleri) | B | Kurucu ayrılır; sıradan oyuncu ayrılır; son oyuncu ayrılır; oyun başladıktan sonra ayrılma | Yetki en erken katılana geçer; boş oda kapanır; başladıktan sonra reddedilir | Bekliyor |
+| T-36 | FR-22 | LobbyServiceTest (yazılacak: rematch testleri) | B | Oyun bitmeden yeni lobi; iki oyuncu aynı anda yeni lobi ister; yeni oyun başladıktan sonra katılım | Bitmeden reddedilir; tek yeni oda açılır; başlamışsa reddedilir | Bekliyor |
