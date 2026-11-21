@@ -1,14 +1,14 @@
 # Vampir Köylü – Test Raporu
 
-Tarih: 2026-11-08 · Kapsam: Aşama 3 (MySQL ile çalışan tam ürün)
+Tarih: 2026-11-08 (son güncelleme: 2026-11-20) · Kapsam: Aşama 3 (MySQL ile çalışan tam ürün)
 
 ## 1. Özet
 
 | Depolama | Komut | Sonuç | Süre |
 | --- | --- | --- | --- |
-| PDO, bellek içi SQLite | `vendor/bin/phpunit` | **158 test, 623 doğrulama, hepsi geçti** | ≈ 37 sn |
-| JSON dosyaları (Aşama 2) | `vendor/bin/phpunit -c phpunit.json.xml` | **158 test, 623 doğrulama, hepsi geçti** | ≈ 77 sn |
-| PDO, **gerçek MariaDB sunucusu** | `composer test:mysql` | **158 test, 623 doğrulama, hepsi geçti** | ≈ 56 sn |
+| PDO, bellek içi SQLite | `vendor/bin/phpunit` | **193 test, 715 doğrulama, hepsi geçti** (20 Kasım) | ≈ 70 sn |
+| JSON dosyaları (Aşama 2) | `vendor/bin/phpunit -c phpunit.json.xml` | **193 test, 715 doğrulama, hepsi geçti** (20 Kasım) | ≈ 70 sn |
+| PDO, **gerçek MariaDB sunucusu** | `composer test:mysql` | **158 test, 623 doğrulama, hepsi geçti** (8 Kasım ölçümü; sohbet ve lobi testlerinden sonra yeniden çalıştırılmadı) | ≈ 56 sn |
 
 `composer test` ilk ikisini art arda çalıştırır (T-33). Üçüncüsü gerçek bir veritabanı sunucusu gerektirdiği için ayrı komuttur. JSON süresi uzundur çünkü 1000 odalık benzersiz kod testi (T-29) her oda için dosya yazar.
 
@@ -16,7 +16,9 @@ Aynı 158 test üç farklı depolamada geçtiği için iki repository uygulamas�
 
 **Güncelleme (2026-11-11):** JSON yazma katmanı yönergedeki "geçici dosyaya yaz, sonra değiştir" kuralına uyacak şekilde düzeltildi (`JsonTable`) ve `tests/Repositories/JsonTableTest.php` içine 8 test eklendi. Güncel sayı: **166 test, 643 doğrulama**; `vendor/bin/phpunit` ve `vendor/bin/phpunit -c phpunit.json.xml` çalıştırmalarının ikisinde de hepsi geçti (PHP 8.3.6, Linux). Yukarıdaki 158'lik ilk ölçümler ve süreler 2026-11-08 tarihlidir; MariaDB sonuçları (158 test) bu değişiklikten önce alınmıştır ve yeniden çalıştırılmadı.
 
-**Ekibin test planına göre durum** (SRS bölüm 8, 33 senaryo): **33 senaryonun hepsi karşılanıyor.** Ayrıntı bölüm 3'te.
+**Güncelleme (2026-11-20):** Sohbet, lobiden ayrılma ve yeni lobi özellikleri için iki test sınıfı eklendi: `tests/Services/ChatServiceTest.php` (13 test) ve `tests/Services/LobbyLeaveRematchTest.php` (14 test). Güncel sayı: **193 test, 715 doğrulama**; `vendor/bin/phpunit` ve `vendor/bin/phpunit -c phpunit.json.xml` çalıştırmalarının ikisinde de hepsi geçti. Yeni testlerin gerçekten hata yakaladığını görmek için ilgili kurallar (gece sohbet kapalı, kurucu devri, yeni lobi koruması) geçici olarak bozuldu ve testler başarısız oldu; kurallar geri alındı.
+
+**Ekibin test planına göre durum** (SRS bölüm 8, 36 senaryo): **36 senaryonun hepsi karşılanıyor.** Ayrıntı bölüm 3'te.
 
 ## 2. Test ortamı
 
@@ -77,6 +79,9 @@ Ekibin planı (SRS bölüm 8) 33 senaryo tanımlıyor. Planda önerilen test sı
 | T-31 | FR-18 | `GameStateTest::testGhostSeesNoSecretsAndCannotAct`, `testGhostKeepsWhatTheSeerLearnedBeforeDying`; `VotingTest::testDeadPlayerCannotVote` | |
 | T-32 | FR-19 | `NightPhaseTest::testMorningSaysNobodyDiedWhenTheDoctorSavesTheTarget` (gizli kayıt); `RepositoryTest::testSecretLogsAreFilteredOut`; `HttpTest::testFinishedGameShowsWinnerRolesAndFullReport` | |
 | T-33 | NFR-4 | `composer test` | Bölüm 1. |
+| T-34 | FR-20 | `ChatServiceTest` (13 test): gece sohbet kapalı, elenenin okuyup yazamaması, 300 ve 301 karakter, boş mesaj, son 60 mesaj, odalar arası yalıtım | |
+| T-35 | FR-21 | `LobbyLeaveRematchTest` (ayrılma testleri): kurucu devri, son oyuncu ayrılınca oda kapanır, başladıktan sonra ayrılma reddi | |
+| T-36 | FR-22 | `LobbyLeaveRematchTest` (yeni lobi testleri): bitmeden ret, ilk basan kurucu olur, çift basışta tek kayıt, yabancı ret | |
 
 Planda olmayan ek testler: CSRF belirteci olmadan POST'un reddi, kullanıcı adındaki HTML'in kaçırılması (XSS), kurucu olmayanın oda silememesi, yönetici sayfalarının yetkisi, oyun geçmişi araması, tuzak bildirimleri (`NightPhaseTest`), ayarların oyuncu sayısı değişince varsayılana dönmesi, 404 sayfası, JSON/PDO repository sözleşmesi, `schema.sql` ile `seed.sql` uyumu.
 

@@ -30,7 +30,7 @@ Aşağıdaki tarihler ve kişiler depodaki commit geçmişinden alınmıştır (
 
 ## 3. Tasarım ve uygulama kararları
 
-**Karar 1 – Repository arayüzü, iki uygulama.** Servisler yalnızca `Repositories\*Interface` arayüzlerine bağımlıdır; `Json\*` (Aşama 2) ve `Pdo\*` (Aşama 3) aynı arayüzü uygular, hangisinin kullanılacağı `config` içindeki `depolama` ayarından gelir. *Alternatif:* önce yalnızca JSON yazıp Aşama 3'te servisleri yeniden yazmak. *Gerekçe:* ödev, Aşama 3'te controller ve servislerin büyük ölçüde aynı kalmasını istiyor; aynı 166 test iki depolamada da çalıştığı için iki uygulamanın aynı davranışı gösterdiği kanıtlanıyor.
+**Karar 1 – Repository arayüzü, iki uygulama.** Servisler yalnızca `Repositories\*Interface` arayüzlerine bağımlıdır; `Json\*` (Aşama 2) ve `Pdo\*` (Aşama 3) aynı arayüzü uygular, hangisinin kullanılacağı `config` içindeki `depolama` ayarından gelir. *Alternatif:* önce yalnızca JSON yazıp Aşama 3'te servisleri yeniden yazmak. *Gerekçe:* ödev, Aşama 3'te controller ve servislerin büyük ölçüde aynı kalmasını istiyor; aynı 193 test iki depolamada da çalıştığı için iki uygulamanın aynı davranışı gösterdiği kanıtlanıyor.
 
 **Karar 2 – Fazın tek kez ilerlemesi için sürüm sütunu.** PDO'da `UPDATE games SET version = version + 1 WHERE id = ? AND version = ?` koşullu güncellemesi kullanılır; etkilenen satır sayısı 1 olan istek fazı ilerletir. *Alternatifler:* oyun satırına `SELECT … FOR UPDATE` ile kilit; sürücü bağımsız uygulama düzeyinde mutex. *Gerekçe:* koşullu güncelleme tek sorguyla ve bekleme olmadan çalışır; JSON sürümünde aynı karşılaştır-ve-artır işlemi dosya kilidi altında yapılır.
 
@@ -48,7 +48,7 @@ Ayrıntılar [ai-gunlugu.md](ai-gunlugu.md) içindedir.
 
 ## 5. Testler
 
-- **Test sayısı:** 166 test, 643 doğrulama. `vendor/bin/phpunit` (PDO, bellek içi SQLite) ve `vendor/bin/phpunit -c phpunit.json.xml` (JSON) ikisinde de hepsi geçer. Yönergenin en az 10 test beklentisi ve SRS NFR-4'ün (en az 5 çekirdek test) üzerindedir.
+- **Test sayısı:** 193 test, 715 doğrulama (20 Kasım). `vendor/bin/phpunit` (PDO, bellek içi SQLite) ve `vendor/bin/phpunit -c phpunit.json.xml` (JSON) ikisinde de hepsi geçer. Yönergenin en az 10 test beklentisi ve SRS NFR-4'ün (en az 5 çekirdek test) üzerindedir.
 - **Önemli sınır durumları:** 4 oyuncuyla başlatma reddedilir, 5 ve 12 oyuncuyla kabul edilir, 13. oyuncu reddedilir; gece seçimi 14. saniyede kabul, 15. saniyeden sonra reddedilir; en çok oyu pas alırsa veya eşitlik olursa kimse elenmez; 1000 odada kod çakışması yoktur; aynı faza 10 eşzamanlı istekte yalnızca biri geçer.
 - **Tekrarlanabilirlik:** süre `FakeClock` ile, rastgelelik tohumlu `Randomizer` ile denetlenir; testler gerçek saate bağlı değildir.
 - **İzlenebilirlik tablosunun yeri:** [izlenebilirlik.md](izlenebilirlik.md) (kullanıcı hikâyesi → gereksinim → test).
@@ -89,4 +89,4 @@ MySQL katmanı depoda hazırdır: `src/Repositories/Pdo/` altında `PdoUserRepos
 
 **Değişen sınıflar:** `Json\*` yerine `Pdo\*` (yukarıdaki liste) ve `JsonRepositoryFactory` yerine `PdoRepositoryFactory`.
 **Riskler:** (1) iki uygulamanın aynı davranmaması (e-posta büyük/küçük harf farkı bu yüzden bulundu); (2) tarih/saat biçimleri (`Support\DbDate`); (3) eşzamanlılık: JSON'da tek dosya kilidi, MySQL'de koşullu `UPDATE` ve transaction; (4) 3NF ve kısıtların (CHECK, dış anahtar) JSON'da bulunmaması.
-**Mimarinin desteği:** aynı 166 test iki depolamada çalıştığı ve MySQL şeması gerçek MariaDB'ye karşı doğrulandığı için geçişin davranışı değiştirmediği ölçülebilir (`test-raporu.md`, bölüm 5).
+**Mimarinin desteği:** aynı 193 test iki depolamada çalıştığı ve MySQL şeması gerçek MariaDB'ye karşı doğrulandığı için geçişin davranışı değiştirmediği ölçülebilir (`test-raporu.md`, bölüm 5).
