@@ -6,6 +6,8 @@
 
 > FR-x / NFR-x / US-x numaraları kullanıcı hikayeleri ve gereksinimler belgesindeki (FR/NFR eşleşmeli) numaralara karşılık gelir.
 
+> Not: Bu belge ilk tasarımı anlatır. Diyagramlardaki Türkçe sınıf adları ve `public/api/` gibi yollar tasarım aşamasındaki adlardır; kod İngilizce adlarla yazıldı. Tasarımla kodun ayrıldığı yerler `docs/uygulama-notlari.md` bölüm 8'dedir.
+
 ---
 
 ## 1. Mimari
@@ -33,13 +35,13 @@ flowchart TB
     REPO --> DB
 ```
 
-| Katman | Sorumluluk | Kural |
-| :--- | :--- | :--- |
-| İstemci | Faz, kalan süre ve oyuncuya özel veriyi gösterir; eylem ve oy gönderir | Süreye ve role güvenmez; yalnızca sunucudan geleni gösterir |
-| Controller | Oturumu ve yetkiyi kontrol eder, girdiyi doğrular, servisi çağırır | İş kuralı içermez |
-| Servis | Faz ilerletme, gece çözümü, oy sayımı, kazanma kontrolü | Tüm oyun kuralları burada; PDO transaction ile çalışır |
-| Alan modeli | Oyun nesneleri ve kendi kuralları (hedef geçerli mi, oy verebilir mi) | Veritabanını bilmez |
-| Repository | SQL sorguları (PDO prepared statement) | Katmanlar arası tek veri erişim noktası |
+| Katman      | Sorumluluk                                                             | Kural                                                       |
+| :---------- | :--------------------------------------------------------------------- | :---------------------------------------------------------- |
+| İstemci     | Faz, kalan süre ve oyuncuya özel veriyi gösterir; eylem ve oy gönderir | Süreye ve role güvenmez; yalnızca sunucudan geleni gösterir |
+| Controller  | Oturumu ve yetkiyi kontrol eder, girdiyi doğrular, servisi çağırır     | İş kuralı içermez                                           |
+| Servis      | Faz ilerletme, gece çözümü, oy sayımı, kazanma kontrolü                | Tüm oyun kuralları burada; PDO transaction ile çalışır      |
+| Alan modeli | Oyun nesneleri ve kendi kuralları (hedef geçerli mi, oy verebilir mi)  | Veritabanını bilmez                                         |
+| Repository  | SQL sorguları (PDO prepared statement)                                 | Katmanlar arası tek veri erişim noktası                     |
 
 ### 1.2 Klasör yapısı
 
@@ -57,7 +59,7 @@ vampir-koylu/
 │   ├── Controller/             # AuthController, OdaController, OyunController
 │   ├── Service/                # FazYoneticisi, GeceCozucu, OySayici, KazanmaKontrolcusu
 │   ├── Model/                  # Kullanici, Oda, Oyuncu, Rol, Oyun, GeceEylemi, Oy, OyunGunlugu
-│   ├── Repository/             # OyunRepository, OyuncuRepository ...
+│   ├── Repositories/           # Json/ ve Pdo/ uygulamaları ve arayüzler
 │   └── Core/                   # Database (PDO), Session, Router
 ├── templates/                  # PHP görünüm dosyaları
 ├── database/
@@ -190,20 +192,20 @@ FazYoneticisi ..> KazanmaKontrolcusu : her cozumden sonra
 
 ### 2.2 Sınıf özeti
 
-| # | Sınıf | Sorumluluk | İlgili FR / NFR |
-| :-- | :--- | :--- | :--- |
-| 1 | Kullanıcı | Kayıt, giriş, çıkış | FR-1, FR-2 |
-| 2 | Oda | Oda kodu, kurucu, 5-12 oyuncu ve vampir/tuzakçı sayısı doğrulaması | FR-3, FR-4, FR-16, FR-17, NFR-1, NFR-2, NFR-3 |
-| 3 | Oyuncu | Canlı/ölü/elenmiş durumu, hayalet modu, doktorun son korunanı | FR-18 |
-| 4 | Rol | Rol türü, takım, gece eylemi ve hedef geçerliliği | FR-5, FR-8 |
-| 5 | Oyun | Faz, gün, bitiş zamanı, kazanan; rol dağıtımı ve role göre filtrelenmiş görünüm | FR-5, FR-6, FR-9, NFR-6, NFR-7 |
-| 6 | GeceEylemi | Gece seçimleri, iptal durumu, kâhin sorgu sonucu | FR-7, FR-8 |
-| 7 | Oy | Oylama ve pas (oyuncu başına tek oy) | FR-11, FR-12, NFR-5 |
-| 8 | OyunGünlüğü | Olay kaydı, gizli kayıtların oyun bitene kadar saklanması | FR-19 |
-| 9 | FazYöneticisi | Süre kontrolü ve fazı yalnızca bir kez ilerletme (PDO transaction) | FR-6, NFR-6 |
-| 10 | GeceÇözücü | Tuzaklar → saldırı/koruma → kâhin sorgusu sırası | FR-8, FR-10 |
-| 11 | OySayıcı | Oy sayımı, eşitlik ve pas kuralı, rol açıklama | FR-12, FR-13 |
-| 12 | KazanmaKontrolcüsü | Her çözümden sonra kazanma koşulu (PHPUnit ile test) | FR-14, FR-15, NFR-4 |
+| #   | Sınıf              | Sorumluluk                                                                      | İlgili FR / NFR                               |
+| :-- | :----------------- | :------------------------------------------------------------------------------ | :-------------------------------------------- |
+| 1   | Kullanıcı          | Kayıt, giriş, çıkış                                                             | FR-1, FR-2                                    |
+| 2   | Oda                | Oda kodu, kurucu, 5-12 oyuncu ve vampir/tuzakçı sayısı doğrulaması              | FR-3, FR-4, FR-16, FR-17, NFR-1, NFR-2, NFR-3 |
+| 3   | Oyuncu             | Canlı/ölü/elenmiş durumu, hayalet modu, doktorun son korunanı                   | FR-18                                         |
+| 4   | Rol                | Rol türü, takım, gece eylemi ve hedef geçerliliği                               | FR-5, FR-8                                    |
+| 5   | Oyun               | Faz, gün, bitiş zamanı, kazanan; rol dağıtımı ve role göre filtrelenmiş görünüm | FR-5, FR-6, FR-9, NFR-6, NFR-7                |
+| 6   | GeceEylemi         | Gece seçimleri, iptal durumu, kâhin sorgu sonucu                                | FR-7, FR-8                                    |
+| 7   | Oy                 | Oylama ve pas (oyuncu başına tek oy)                                            | FR-11, FR-12, NFR-5                           |
+| 8   | OyunGünlüğü        | Olay kaydı, gizli kayıtların oyun bitene kadar saklanması                       | FR-19                                         |
+| 9   | FazYöneticisi      | Süre kontrolü ve fazı yalnızca bir kez ilerletme (PDO transaction)              | FR-6, NFR-6                                   |
+| 10  | GeceÇözücü         | Tuzaklar → saldırı/koruma → kâhin sorgusu sırası                                | FR-8, FR-10                                   |
+| 11  | OySayıcı           | Oy sayımı, eşitlik ve pas kuralı, rol açıklama                                  | FR-12, FR-13                                  |
+| 12  | KazanmaKontrolcüsü | Her çözümden sonra kazanma koşulu (PHPUnit ile test)                            | FR-14, FR-15, NFR-4                           |
 
 **Sabit liste değerleri**
 
@@ -314,7 +316,6 @@ sequenceDiagram
 ---
 
 ## 4. ER diyagramı
-# ER Diyagramı
 
 ```mermaid
 erDiagram
@@ -402,35 +403,31 @@ erDiagram
 
 Oyun durumunu (faz, süre, ölü/diri) tek bir yerde tutmak yerine `games`, `players` ve `phases` olarak ayırdık; böylece faz geçişleri `phases`'e eklenen satırlarla yapılır ve `UNIQUE(game_id, sequence_no)` kısıtı faz geçişinin iki kez tetiklenmesini veritabanı seviyesinde engeller. Gizli rol tek bir sütunda (`players.role_id`) tutulur ve rol sızıntısı, sunucunun yanıtı role göre filtrelemesiyle önlenir. Oylar ve gece eylemleri ayrı tablolardadır; çünkü oy herkes için, eylem yalnızca rolü olanlar için vardır ve alanları farklıdır. Veri tekrarını önlemek için kullanıcı bilgisi `users`'ta, rol bilgisi `roles`'ta, oyun bilgisi `games`'te tutulur; diğer tablolar yalnızca `id` ile bunlara bağlanır ve böylece 3NF sağlanır.
 
-
-
 ## 5. Tasarım desenleri
 
-### 5.1 State (Durum) – Oyun fazları
+### 5.1 Faz yönetimi (State deseni yerine enum ve match)
 
-- **Nerede:** `Oyun.faz` ve `FazYoneticisi`. Her faz (Lobi, Gece, Gündüz, Oylama, Bitiş) PHP'de `FazDurumu` arayüzünü gerçekleyen bir sınıftır: süresini, izin verdiği eylemleri ve bir sonraki fazı bilir.
-- **Gerekçe:** Faz sırası sabit, ancak süre (25/75/30 sn) ve izinli eylem faza göre değişir. `if/switch` zinciri yerine her faz kendi kuralını taşır. Böylece "gece eylemi yalnızca Gece fazında kabul edilir" (FR-7) ve "oy yalnızca Oylama fazında verilir" (FR-11) kuralları tek yerde, faza özel sınıfta durur.
-- **Kazanç:** Yeni faz eklemek tek sınıf eklemektir. Faz geçiş sırası `FazYoneticisi` içinde dağınık koşullara dönüşmez.
-- **Not:** Bu desen 12 sınıflık diyagramı değiştirmez; `FazYoneticisi`'nin iç yapısıdır.
+- **Nerede:** `src/Models/PhaseType.php` (Gece, Gündüz, Oylama) ve `src/Game/PhaseManager.php`. Süreleri `src/Game/GameRules.php` içindeki `durationOf()` verir.
+- **Nasıl çalışıyor:** Her faz ayrı bir sınıf değildir. Faz türü `PhaseType` enum'udur; `PhaseManager` içinde `match` ifadeleriyle faz bitince hangi işlemin yapılacağı ve sıradaki fazın hangisi olduğu seçilir. Lobi ve Bitiş fazı değil, oyunun durumudur (`GameStatus`).
+- **Not:** İlk tasarımdaki `FazDurumu` State sınıfları uygulanmadı.
 
 ### 5.2 Strategy (Strateji) – Rol kuralları
 
-- **Nerede:** `Rol.hedefGecerliMi()` ve gece eylemi doğrulaması. Her rol türü için bir `RolKurali` stratejisi vardır (VampirKurali, DoktorKurali, KahinKurali, TuzakciKurali, KoyluKurali).
-- **Gerekçe:** Hedef kuralları rolden role değişir: vampir kendini seçemez, doktor art arda iki gece kendini koruyamaz, kâhin kendini sorgulayamaz, tuzakçı kendi evine tuzak kuramaz. Tek metotta rol türüne göre dallanmak yerine `Rol.tur` değerine göre doğru strateji seçilir.
-- **Kazanç:** Her kural bağımsız PHPUnit testiyle sınanır (NFR-4); yeni rol eklemek mevcut kodu değiştirmeden yeni strateji eklemektir (açık/kapalı prensibi).
+- **Nerede:** `src/Game/TargetRules/` klasöründe. `TargetRules.php`, rol türüne göre uygulanacak hedef kuralını seçer. Kurallar `VampireRule`, `DoctorRule`, `SeerRule` ve `TrapperRule` sınıflarında bulunur. Köylünün gece eylemi olmadığı için ayrı bir kuralı yoktur.
+- **Gerekçe:** Her rolün hedef seçme kuralı farklıdır. Örneğin vampir kendisini hedefleyemez, doktor art arda iki gece kendisini koruyamaz, kâhin kendisini sorgulayamaz ve tuzakçı kendi evine tuzak kuramaz. Bu kurallar rol türüne göre uygun sınıfta tutulur.
+- **Kazanç:** Her rolün hedef kuralı ayrı bir sınıfta görülebilir ve değiştirilebilir. Yeni bir rol kuralı eklenirse ilgili sınıf `TargetRules` seçimine de eklenmelidir.
 
 ### 5.3 Repository – Veri erişimi
 
-- **Nerede:** `src/Repository/` altındaki sınıflar. Tüm PDO sorguları yalnızca burada yazılır.
-- **Gerekçe:** Servis ve alan sınıfları SQL bilmez. Bu, güvenliği (prepared statement kullanımı tek noktada) ve testi kolaylaştırır: `KazanmaKontrolcusu` gibi sınıflar veritabanı olmadan sahte (in-memory) repository ile test edilir.
+- **Nerede:** Repository arayüzleri `src/Repositories/` klasöründedir. JSON uygulamaları `src/Repositories/Json/`, PDO uygulamaları `src/Repositories/Pdo/` klasöründedir.
+- **Gerekçe:** Servisler veriyi repository arayüzleri üzerinden kullanır. JSON ve PDO sınıfları aynı arayüzleri uygular; kullanılacak depolama ayarı uygulama başlangıcında seçilir.
+- **Kazanç:** Veri erişimi servislerden ayrı tutulur. PDO sorguları `Pdo/` sınıflarında, JSON dosya işlemleri `Json/` sınıflarında bulunur.
 
 ---
 
 ## 6. Arayüz
 
-Arayüz karanlık-fantastik bir köy temasıyla tasarlandı: Gece ekranları koyu mavi ve mor, Gündüz ekranı açık gökyüzü tonlarında; vurgu rengi kırmızıdır (düğmeler, vampir temaları). Aşağıdaki görsel 6 ana ekranın tasarımıdır.
-
-![Vampir Köylü arayüz tasarımı: Lobi, Gece, Gündüz, Eleme, Oyuncular, Vampir Elendi](img/arayuz-tasarimi.png)
+Arayüz karanlık-fantastik bir köy temasıyla tasarlandı: Gece ekranları koyu mavi ve mor, Gündüz ekranı açık gökyüzü tonlarında; vurgu rengi kırmızıdır (düğmeler, vampir temaları). Ekranlar ve sistemle eşleşmeleri 6.2'deki tabloda anlatılmıştır.
 
 ### 6.1 Sayfa haritası
 
@@ -456,31 +453,31 @@ flowchart TD
 
 ### 6.2 Ekranlar ve sistemle eşleşmesi
 
-| # | Ekran | Tasarımdaki içerik | Sistem karşılığı |
-| :-- | :--- | :--- | :--- |
-| 1 | **Lobi** | Oyun adı, oyuncu sayısı (7/8), oyun modu, **Oyun Başlat**, Ayarlar, Çıkış; oyuncular köydeki evlerinde | `Oda`; başlatma yalnızca kurucuda ve 5-12 oyuncuyla (FR-4); Ayarlar vampir/tuzakçı sayısı (FR-17) |
-| 2 | **Gece** | Gece sayacı, "Karakterler görevlerini tamamlıyor...", Doktor / Vampirler / Kâhin / Tuzakçı durum kartları (Uyuyor, Uyanıyor, Görevde) | `Oyun.faz = GECE`, `GeceEylemi` (FR-7, FR-8) |
-| 3 | **Gündüz** | Gündüz sayacı, "Kim öldü? Tuzağa kim düştü? Herkes oyunu değerlendiriyor..." | Sabah duyurusu (FR-10), tartışma uygulama dışında |
-| 4 | **Eleme** | "Kime oy veriyorsunuz?", oyuncu portreleri, süre sayacı, **Oy Ver** | `Oy`, `OySayici` (FR-11, FR-12, NFR-5) |
-| 5 | **Oyuncular** | Oyuncu listesi (avatar, ad, rol ikonu ve adı) ve seçilen oyuncunun evi ("Vampir Evi") | `Oyuncu`, `Rol`; gece hedef seçimi (ev) ve oyun sonu rol listesi (FR-13, FR-15) |
-| 6 | **Vampir Elendi!** | "Güneş onu yakıyor..." animasyonu, "Vampirin şapkası düştü!" bildirimi | Eleme sonucu ve rol açıklama (FR-13) |
+| #   | Ekran              | Tasarımdaki içerik                                                                                                                    | Sistem karşılığı                                                                                  |
+| :-- | :----------------- | :------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------ |
+| 1   | **Lobi**           | Oyun adı, oyuncu sayısı (7/8), oyun modu, **Oyun Başlat**, Ayarlar, Çıkış; oyuncular köydeki evlerinde                                | `Oda`; başlatma yalnızca kurucuda ve 5-12 oyuncuyla (FR-4); Ayarlar vampir/tuzakçı sayısı (FR-17) |
+| 2   | **Gece**           | Gece sayacı, "Karakterler görevlerini tamamlıyor...", Doktor / Vampirler / Kâhin / Tuzakçı durum kartları (Uyuyor, Uyanıyor, Görevde) | `Oyun.faz = GECE`, `GeceEylemi` (FR-7, FR-8)                                                      |
+| 3   | **Gündüz**         | Gündüz sayacı, "Kim öldü? Tuzağa kim düştü? Herkes oyunu değerlendiriyor..."                                                          | Sabah duyurusu (FR-10), tartışma uygulama dışında                                                 |
+| 4   | **Eleme**          | "Kime oy veriyorsunuz?", oyuncu portreleri, süre sayacı, **Oy Ver**                                                                   | `Oy`, `OySayici` (FR-11, FR-12, NFR-5)                                                            |
+| 5   | **Oyuncular**      | Oyuncu listesi (avatar, ad, rol ikonu ve adı) ve seçilen oyuncunun evi ("Vampir Evi")                                                 | `Oyuncu`, `Rol`; gece hedef seçimi (ev) ve oyun sonu rol listesi (FR-13, FR-15)                   |
+| 6   | **Vampir Elendi!** | "Güneş onu yakıyor..." animasyonu, "Vampirin şapkası düştü!" bildirimi                                                                | Eleme sonucu ve rol açıklama (FR-13)                                                              |
 
 ### 6.3 Tasarımın gereksinimlerle uyumu için düzeltmeler
 
 Tasarım taslak olduğu için bazı yerler gereksinimlerle çelişir veya eksiktir. Uygulamada şöyle çözülür:
 
-| # | Ekran | Tasarımda | Uygulamada olacak | Gereksinim |
-| :-- | :--- | :--- | :--- | :--- |
-| 1 | Gece, Gündüz, Eleme | Sayaçlar 00:45, 02:00, 00:52 | Gece **00:25**, Gündüz **01:15**, Eleme **00:30**; sayaç sunucu süresine göre gösterilir | FR-6 |
-| 2 | Gece | Rol kartları "Uyuyor / Uyanıyor / Görevde" | Kartlar tüm oyunculara aynı davranır; rol sahibinin ölü olması veya eylem yapıp yapmaması kartta belli olmaz (gece ölenin rolü gizli kalmalı) | FR-9, FR-13 |
-| 3 | Gece | Hedef seçme paneli yok | Rol sahibi oyuncuya özel **hedef seçme paneli** eklenir; yalnızca ilk 15 saniye açık, seçimden sonra kilitlenir | FR-7 |
-| 4 | Gündüz | "Tuzağa kim düştü?" herkese sorulur | Duyuruda yalnızca "Bu gece X öldü" / "Bu gece kimse ölmedi" yazar. Tuzağa takılan yalnızca kendisine, tuzakçı yalnızca "biri takıldı mı" bilgisini alır; doktorun kimi kurtardığı açıklanmaz | FR-10, US-6 |
-| 5 | Eleme | Portrelerin altında rol etiketleri (Kâhin, Doktor, Tuzakçı) | Portrelerin altında yalnızca **oyuncu adı** yazar; hiçbir rol etiketi gösterilmez | FR-9, NFR-7 |
-| 6 | Eleme | Yalnızca oyuncu portreleri | **Pas geç** seçeneği eklenir; kendi portresi pasif, ölü/elenen oyuncular listede yok | FR-11, FR-12 |
-| 7 | Oyuncular | Tüm rolleri gösteren liste | Oyun sürerken yalnızca **açıklanmış roller** (oylamayla elenenler, kâhin istisnası) ve oyuncunun kendi rolü görünür; tam rol listesi oyun sonu raporunda gösterilir | FR-9, FR-13, FR-15 |
-| 8 | Vampir Elendi | "Artık bir köylü olarak izlemeye devam edecek" | Metin **"hayalet olarak izlemeye devam edecek"** olur; elenen vampir köylü olmaz, takımı değişmez | FR-18 |
-| 9 | Vampir Elendi | Yalnızca vampir için ekran var | Her rol için aynı şablon (Köylü, Doktor, Tuzakçı, Kâhin elendi); gece ölenlerin rolü açıklanmaz | FR-13 |
-| 10 | Lobi | Oda kodu görünmüyor | Davet için **oda kodu** ve kopyala düğmesi eklenir; Oyun Başlat yalnızca kurucuya görünür | FR-16, FR-4 |
+| #   | Ekran               | Tasarımda                                                   | Uygulamada olacak                                                                                                                                                                            | Gereksinim         |
+| :-- | :------------------ | :---------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------- |
+| 1   | Gece, Gündüz, Eleme | Sayaçlar 00:45, 02:00, 00:52                                | Gece **00:25**, Gündüz **01:15**, Eleme **00:30**; sayaç sunucu süresine göre gösterilir                                                                                                     | FR-6               |
+| 2   | Gece                | Rol kartları "Uyuyor / Uyanıyor / Görevde"                  | Kartlar tüm oyunculara aynı davranır; rol sahibinin ölü olması veya eylem yapıp yapmaması kartta belli olmaz (gece ölenin rolü gizli kalmalı)                                                | FR-9, FR-13        |
+| 3   | Gece                | Hedef seçme paneli yok                                      | Rol sahibi oyuncuya özel **hedef seçme paneli** eklenir; yalnızca ilk 15 saniye açık, seçimden sonra kilitlenir                                                                              | FR-7               |
+| 4   | Gündüz              | "Tuzağa kim düştü?" herkese sorulur                         | Duyuruda yalnızca "Bu gece X öldü" / "Bu gece kimse ölmedi" yazar. Tuzağa takılan yalnızca kendisine, tuzakçı yalnızca "biri takıldı mı" bilgisini alır; doktorun kimi kurtardığı açıklanmaz | FR-10, US-6        |
+| 5   | Eleme               | Portrelerin altında rol etiketleri (Kâhin, Doktor, Tuzakçı) | Portrelerin altında yalnızca **oyuncu adı** yazar; hiçbir rol etiketi gösterilmez                                                                                                            | FR-9, NFR-7        |
+| 6   | Eleme               | Yalnızca oyuncu portreleri                                  | **Pas geç** seçeneği eklenir; kendi portresi pasif, ölü/elenen oyuncular listede yok                                                                                                         | FR-11, FR-12       |
+| 7   | Oyuncular           | Tüm rolleri gösteren liste                                  | Oyun sürerken yalnızca **açıklanmış roller** (oylamayla elenenler, kâhin istisnası) ve oyuncunun kendi rolü görünür; tam rol listesi oyun sonu raporunda gösterilir                          | FR-9, FR-13, FR-15 |
+| 8   | Vampir Elendi       | "Artık bir köylü olarak izlemeye devam edecek"              | Metin **"hayalet olarak izlemeye devam edecek"** olur; elenen vampir köylü olmaz, takımı değişmez                                                                                            | FR-18              |
+| 9   | Vampir Elendi       | Yalnızca vampir için ekran var                              | Her rol için aynı şablon (Köylü, Doktor, Tuzakçı, Kâhin elendi); gece ölenlerin rolü açıklanmaz                                                                                              | FR-13              |
+| 10  | Lobi                | Oda kodu görünmüyor                                         | Davet için **oda kodu** ve kopyala düğmesi eklenir; Oyun Başlat yalnızca kurucuya görünür                                                                                                    | FR-16, FR-4        |
 
 ### 6.4 Tasarımı henüz yapılmamış ekranlar (taslaklar)
 
@@ -570,17 +567,17 @@ Sayfa haritasındaki şu ekranlar görsel tasarımda yoktur; aynı tema ile çiz
 
 ## 7. Riskler
 
-| # | Risk | Olasılık | Etki | Önlem |
-| :-- | :--- | :--- | :--- | :--- |
-| R1 | Başka oyuncunun rolü API yanıtında sızar (vampir kimliği dahil) | Orta | Yüksek | Tüm durum yanıtları `Oyun.durumGorunumu(bakanOyuncu)` üzerinden üretilir; her rolle tüm uç noktaları tarayan test yazılır (NFR-7) |
-| R2 | Aynı faz eşzamanlı isteklerle birden fazla kez ilerler, gece iki kez çözülür | Yüksek | Yüksek | `Oyun.surum` ile iyimser kilit ve PDO transaction; 10 eşzamanlı istek testi (NFR-6) |
-| R3 | İstemci süresi veya isteği değiştirilerek erken eylem / erken faz geçişi yapılır | Orta | Yüksek | Süre yalnızca sunucu saatiyle ölçülür; faz dışı ve 15 sn sonrası eylemler 409 ile reddedilir |
-| R4 | Aynı oyuncu birden fazla oy kullanır veya gece seçimini değiştirir | Orta | Yüksek | `votes` ve `night_actions` tablolarında benzersizlik kısıtı (NFR-5, FR-7) |
-| R5 | 12 oyunculu odalarda AJAX polling sunucuyu yorar | Orta | Orta | Hafif durum uç noktası, gereksiz sorgu yok, polling aralığı 1-2 sn; yük testiyle ölçülür |
-| R6 | Kazanma veya gece çözümü kuralları sınır durumlarında yanlış sonuç verir | Orta | Yüksek | Çekirdek sınıflar için en az 5 PHPUnit testi; sınır durumları (eşit sayı, sıfır vampir, aynı kişiyi koruma) dahil (NFR-4) |
-| R7 | Oda kodu çakışır | Düşük | Orta | Benzersiz indeks, çakışmada yeniden üretim; 1000 kodluk çakışma testi (NFR-2) |
-| R8 | Zayıf oturum yönetimi veya SQL injection ile hesap ele geçirilir | Düşük | Yüksek | `password_hash`, girişte `session_regenerate_id`, yalnızca PDO prepared statement |
-| R9 | Takım zamanı yetmez, kapsam büyür | Orta | Orta | Önce çekirdek hikayeler (US-3 ~ US-11), sonra hayalet, günlük ve rapor; kapsam dışı: botlar (metin sohbeti sonradan kapsama alındı, FR-20) |
+| #   | Risk                                                                             | Olasılık | Etki   | Önlem                                                                                                                                      |
+| :-- | :------------------------------------------------------------------------------- | :------- | :----- | :----------------------------------------------------------------------------------------------------------------------------------------- |
+| R1  | Başka oyuncunun rolü API yanıtında sızar (vampir kimliği dahil)                  | Orta     | Yüksek | Tüm durum yanıtları `Oyun.durumGorunumu(bakanOyuncu)` üzerinden üretilir; her rolle tüm uç noktaları tarayan test yazılır (NFR-7)          |
+| R2  | Aynı faz eşzamanlı isteklerle birden fazla kez ilerler, gece iki kez çözülür     | Yüksek   | Yüksek | `Oyun.surum` ile iyimser kilit ve PDO transaction; 10 eşzamanlı istek testi (NFR-6)                                                        |
+| R3  | İstemci süresi veya isteği değiştirilerek erken eylem / erken faz geçişi yapılır | Orta     | Yüksek | Süre yalnızca sunucu saatiyle ölçülür; faz dışı ve 15 sn sonrası eylemler 409 ile reddedilir                                               |
+| R4  | Aynı oyuncu birden fazla oy kullanır veya gece seçimini değiştirir               | Orta     | Yüksek | `votes` ve `night_actions` tablolarında benzersizlik kısıtı (NFR-5, FR-7)                                                                  |
+| R5  | 12 oyunculu odalarda AJAX polling sunucuyu yorar                                 | Orta     | Orta   | Hafif durum uç noktası, gereksiz sorgu yok, polling aralığı 1-2 sn; yük testiyle ölçülür                                                   |
+| R6  | Kazanma veya gece çözümü kuralları sınır durumlarında yanlış sonuç verir         | Orta     | Yüksek | Çekirdek sınıflar için en az 5 PHPUnit testi; sınır durumları (eşit sayı, sıfır vampir, aynı kişiyi koruma) dahil (NFR-4)                  |
+| R7  | Oda kodu çakışır                                                                 | Düşük    | Orta   | Benzersiz indeks, çakışmada yeniden üretim; 1000 kodluk çakışma testi (NFR-2)                                                              |
+| R8  | Zayıf oturum yönetimi veya SQL injection ile hesap ele geçirilir                 | Düşük    | Yüksek | `password_hash`, girişte `session_regenerate_id`, yalnızca PDO prepared statement                                                          |
+| R9  | Takım zamanı yetmez, kapsam büyür                                                | Orta     | Orta   | Önce çekirdek hikayeler (US-3 ~ US-11), sonra hayalet, günlük ve rapor; kapsam dışı: botlar (metin sohbeti sonradan kapsama alındı, FR-20) |
 
 ---
 
@@ -588,7 +585,7 @@ Sayfa haritasındaki şu ekranlar görsel tasarımda yoktur; aynı tema ile çiz
 
 ### 8.1 Backlog bağlantısı
 
-GitHub Projects panosu: **`https://github.com/<kullanici-adi>/<repo-adi>/projects`** *(gerçek bağlantıyla değiştirin)*
+GitHub Projects panosu: **`https://github.com/<kullanici-adi>/<repo-adi>/projects`** _(gerçek bağlantıyla değiştirin)_
 
 - Her kullanıcı hikayesi (US-1 ~ US-16) panoda bir issue olarak açılır; başlığı hikaye numarasını taşır (örn. `US-9 Oy verme ve eleme`).
 - Etiketler hikayelerdeki gibidir: `aşama-2`, `çekirdek`, `test`, `güvenlik`.
@@ -599,11 +596,11 @@ GitHub Projects panosu: **`https://github.com/<kullanici-adi>/<repo-adi>/project
 
 Sunum 1 tarihi (4. hafta) kesindir; sonraki haftalar önerilen dağılımdır, ders takvimine göre güncelleyin.
 
-| Kilometre taşı | Hafta | İçerik | Hikayeler |
-| :--- | :--- | :--- | :--- |
-| M1 – Tasarım ve backlog | Hafta 4 (Sunum 1) | `docs/tasarim.md` (8 bölüm), GitHub Projects backlog'u, `schema.sql` taslağı | – |
-| M2 – Hesap ve oda | Hafta 5 | Kayıt/giriş/çıkış, oda kurma, odaya katılma, rol sayısı ayarı | US-1, US-2, US-13, US-14 |
-| M3 – Oyun çekirdeği | Hafta 6-7 | Oyun başlatma, rol dağıtımı, faz ve süre yönetimi, gece eylemleri, rol gizliliği | US-3, US-4, US-5, US-6, US-7 |
-| M4 – Gündüz, oylama, kazanma | Hafta 8 | Sabah duyurusu, oylama ve eleme, rol açıklama kuralı, kazanma kontrolü + PHPUnit | US-8, US-9, US-10, US-11 |
-| M5 – Tamamlayıcılar | Hafta 9 | Hayalet modu, oyun günlüğü, oyun sonu raporu | US-15, US-16, US-12 |
-| M6 – Test ve teslim | Hafta 10 | NFR ölçüm testleri (sızıntı, eşzamanlılık, tek oy), hata düzeltme, son sunum hazırlığı | NFR-1 ~ NFR-7 |
+| Kilometre taşı               | Hafta             | İçerik                                                                                 | Hikayeler                    |
+| :--------------------------- | :---------------- | :------------------------------------------------------------------------------------- | :--------------------------- |
+| M1 – Tasarım ve backlog      | Hafta 4 (Sunum 1) | `docs/tasarim.md` (8 bölüm), GitHub Projects backlog'u, `schema.sql` taslağı           | –                            |
+| M2 – Hesap ve oda            | Hafta 5           | Kayıt/giriş/çıkış, oda kurma, odaya katılma, rol sayısı ayarı                          | US-1, US-2, US-13, US-14     |
+| M3 – Oyun çekirdeği          | Hafta 6-7         | Oyun başlatma, rol dağıtımı, faz ve süre yönetimi, gece eylemleri, rol gizliliği       | US-3, US-4, US-5, US-6, US-7 |
+| M4 – Gündüz, oylama, kazanma | Hafta 8           | Sabah duyurusu, oylama ve eleme, rol açıklama kuralı, kazanma kontrolü + PHPUnit       | US-8, US-9, US-10, US-11     |
+| M5 – Tamamlayıcılar          | Hafta 9           | Hayalet modu, oyun günlüğü, oyun sonu raporu                                           | US-15, US-16, US-12          |
+| M6 – Test ve teslim          | Hafta 10          | NFR ölçüm testleri (sızıntı, eşzamanlılık, tek oy), hata düzeltme, son sunum hazırlığı | NFR-1 ~ NFR-7                |
