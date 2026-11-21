@@ -2,9 +2,9 @@
 
 Bu belge, Aşama 1'deki kullanıcı hikâyelerini (US), işlevsel gereksinimleri (FR) ve işlevsel olmayan gereksinimleri (NFR) **kodda gerçekten bulunan PHPUnit testleriyle** eşleştirir. Gereksinim metinleri ve kabul kriterleri için [srs.md](srs.md), testlerin ayrıntılı sonuçları için [test-raporu.md](test-raporu.md) dosyasına bakın.
 
-- **Test no (T-01 … T-33):** ekibin SRS bölüm 8'deki test planındaki numaralardır. Planda önerilen test adları kodda değişti; bu belgedeki adlar kodda var olan gerçek adlardır (`tests/` klasörü, `Sınıf::yöntem`).
+- **Test no (T-01 … T-36):** ekibin SRS bölüm 8'deki test planındaki numaralardır. Planda önerilen test adları kodda değişti; bu belgedeki adlar kodda var olan gerçek adlardır (`tests/` klasörü, `Sınıf::yöntem`).
 - **Nasıl çalışır:** testler iki kez çalıştırılır: `vendor/bin/phpunit` (PDO, bellek içi SQLite) ve `vendor/bin/phpunit -c phpunit.json.xml` (JSON repository'leri). `composer test` ikisini art arda çalıştırır.
-- **Güncel durum (2026-11-11):** 166 test, 643 doğrulama; iki çalıştırmada da hepsi geçti.
+- **Güncel durum (2026-11-20):** 193 test, 715 doğrulama; iki çalıştırmada da hepsi geçti.
 
 ## 1. Gereksinim → test eşleşmesi
 
@@ -29,6 +29,9 @@ Bu belge, Aşama 1'deki kullanıcı hikâyelerini (US), işlevsel gereksinimleri
 | FR-17 | US-14 | T-30 | T-30: `LobbyServiceTest::testHostCanChangeTheRoleSettings`, `testOnlyTheHostCanChangeTheRoleSettings`, `testInvalidRoleSettingsAreRejected`; `GameStartTest::testChosenRoleCountsAreUsed`; `HttpTest::testHostChangesTheRoleSettingsOverHttp` |
 | FR-18 | US-15 | T-31 | T-31: `GameStateTest::testGhostSeesNoSecretsAndCannotAct`, `testGhostKeepsWhatTheSeerLearnedBeforeDying`; `VotingTest::testDeadPlayerCannotVote` |
 | FR-19 | US-16 | T-32 | T-32: `NightPhaseTest::testMorningSaysNobodyDiedWhenTheDoctorSavesTheTarget` (gizli kayıt); `RepositoryTest::testSecretLogsAreFilteredOut`; `HttpTest::testFinishedGameShowsWinnerRolesAndFullReport` |
+| FR-20 | US-17 | T-34 | T-34: `ChatServiceTest::testPlayerCanChatDuringTheDay`, `testChatIsClosedAtNight`, `testChatIsOpenDuringTheVote`, `testEliminatedPlayerCanReadButCannotWrite`, `testPlayerOutsideTheRoomCannotWrite`, `testEmptyAndBlankMessagesAreRejected`, `testMessageLengthLimitIsThreeHundredCharacters`, `testOnlyTheLatestSixtyMessagesAreVisibleInOrder` |
+| FR-21 | US-18 | T-35 | T-35: `LobbyLeaveRematchTest::testHostLeavingPassesHostToTheEarliestJoiner`, `testRoomIsClosedWhenTheLastPlayerLeaves`, `testCannotLeaveAfterTheGameStarted`, `testPlayerWhoLeftCanJoinAgain` |
+| FR-22 | US-19 | T-36 | T-36: `LobbyLeaveRematchTest::testRematchIsRejectedBeforeTheGameEnds`, `testFirstPlayerOpensTheNewLobbyAndBecomesItsHost`, `testOtherPlayersJoinTheSameNewLobby`, `testPressingRematchTwiceDoesNotDuplicateThePlayer`, `testLatePlayerCannotJoinNewLobbyAfterItStarted` |
 | NFR-1 | US-2 | T-05 | T-05: `LobbyServiceTest::testThirteenthPlayerIsRejected`; `HttpTest::testJoiningAFullRoomIsRejectedWithinThreeSeconds` |
 | NFR-2 | US-13 | T-29 | T-29: `LobbyServiceTest::testThousandRoomsNeverShareACode`, `testCreateRoomGeneratesUniqueCodesAndAddsTheHost` |
 | NFR-3 | US-3 | T-07 | T-07: `GameStartTest::testCannotStartWithFewerThanFivePlayers` (1, 2, 3, 4 oyuncu), `testCannotStartWithMoreThanTwelvePlayers` |
@@ -57,6 +60,9 @@ Bu belge, Aşama 1'deki kullanıcı hikâyelerini (US), işlevsel gereksinimleri
 | US-14 | FR-17 | T-30 |
 | US-15 | FR-18 | T-31 |
 | US-16 | FR-19 | T-32 |
+| US-17 | FR-20 | T-34 |
+| US-18 | FR-21 | T-35 |
+| US-19 | FR-22 | T-36 |
 
 Planda bir gereksinimi olmayan ama proje kartı ve ödev yönergesi nedeniyle yazılmış testler bölüm 4'tedir.
 

@@ -4,7 +4,7 @@ Bu rehber oyunu oynayacak kişiler (oyuncu, oda kurucusu) ve yöneticiler içind
 
 ## 1. Oyun nedir?
 
-5 ile 12 kişinin tarayıcıdan oynadığı gizli rollü bir oyundur. Herkese gizlice bir rol verilir. **Köylüler** tüm vampirleri bulup elemeye, **vampirler** ise sayıca köylülere yetişmeye çalışır. Oyun içinde sohbet yoktur; tartışmayı uygulama dışında (yüz yüze ya da ayrı bir görüşmede) yaparsınız.
+5 ile 12 kişinin tarayıcıdan oynadığı gizli rollü bir oyundur. Herkese gizlice bir rol verilir. **Köylüler** tüm vampirleri bulup elemeye, **vampirler** ise sayıca köylülere yetişmeye çalışır. Oyun ekranındaki **💬 Sohbet** kartından (gece hariç) diğer oyuncularla yazışabilirsiniz.
 
 ## 2. Başlarken
 
@@ -32,6 +32,7 @@ Oda dolu (12 kişi) ya da oyun başlamışsa katılım reddedilir ve ekranda uya
   - Ayarlamazsanız vampir sayısı 5–7 oyuncuda 1, 8–10 oyuncuda 2, 11–12 oyuncuda 3 olur.
 - **Oyunu başlat:** en az 5 oyuncu gerekir. Başlayınca yeni oyuncu katılamaz ve ayar değişmez.
 - **Odayı sil:** lobideki ya da biten odayı silersiniz (geri alınamaz).
+- **Odadan ayrıl (🚪):** oyun başlamadan odadan çıkabilirsiniz. Kurucu ayrılırsa kurucu yetkisi **en erken katılan** oyuncuya geçer. Odada kimse kalmazsa oda kapanır. Oyun başladıktan sonra ayrılamazsınız. Ayrılan oyuncu kodla yeniden katılabilir.
 
 Diğer oyuncular kurucunun başlatmasını bekler. Ekran kendiliğinden güncellenir, sayfayı yenilemeniz gerekmez.
 
@@ -71,10 +72,19 @@ Fazlar sırayla tekrarlanır: **Gece → Gündüz → Oylama → Gece ...** Sür
 - Herkes oy kullanırsa oylama süre dolmadan biter. Oy vermeyenler pas sayılır.
 - En çok oyu alan **elenir ve rolü herkese açıklanır**. Eşitlik varsa ya da en çok oyu "pas" aldıysa kimse elenmez.
 
+### 💬 Sohbet
+- Sohbet **lobide, gündüz, oylama sırasında ve oyun bittikten sonra** açıktır; **gece kapalıdır** ("Gece sohbet kapalı" uyarısı çıkar).
+- Mesaj en fazla **300 karakter** olabilir, boş mesaj gönderilemez. Ekranda son **60 mesaj** görünür.
+- Ölen ya da elenen oyuncular sohbeti **okuyabilir, yazamaz**.
+- Yalnızca o odadaki oyuncular yazabilir.
+
 ### 🏁 Oyun sonu
 - **Köylüler**, tüm vampirler elenince kazanır.
 - **Vampirler**, canlı vampir sayısı canlı köylü tarafına (köylü, doktor, kâhin, tuzakçı) eşit ya da fazla olunca kazanır.
 - Kazanan, tüm roller ve gizli olaylar dahil **olay özeti** gösterilir.
+
+### 🔁 Yeni oyun (lobiye dön)
+Oyun bitince **🔁 Lobiye dön** düğmesine basın. **İlk basan** oyuncu yeni lobiyi açar ve kurucusu olur; diğerleri düğmede **(yeni lobi hazır)** yazısını görür ve aynı yeni lobiye katılır. Eski oyun **Oyunlarım** sayfasında sonuçlarıyla birlikte kalır. Yeni lobi başladıysa geç kalan oyuncu katılamaz ("Yeni oyun başlamış").
 
 ## 7. Ölünce ne olur?
 
@@ -100,6 +110,7 @@ Yönetici hesabıyla menüde ek sayfalar görünür:
 | --- | --- |
 | "Oda dolu" / "Bu oyun başlamış" | Oda 12 kişiyse ya da oyun başladıysa katılamazsınız. |
 | "Seçim süresi doldu" | Gece eylemi yalnızca ilk 15 saniyede seçilir. |
+| "Gece sohbet kapalı" | Sohbet yalnızca gece kapalıdır; gündüz açılınca yazabilirsiniz. |
 | "Seçimini yaptın; değiştiremezsin" | Gece eyleminiz ve oyunuz bir kez verilir. |
 | "Oturumunuz kapatıldı" | 30 dakika işlem yapılmazsa oturum kapanır, yeniden giriş yapın. |
 | Ekran güncellenmiyor | Sayfayı yenileyin; oturumunuz kapanmış olabilir. Ekran normalde 3 saniyede bir kendiliğinden güncellenir. |

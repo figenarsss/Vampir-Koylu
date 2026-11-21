@@ -1,6 +1,6 @@
 # Vampir Köylü – Tasarım Belgesi
 
-Çok oyunculu, sunucu tabanlı Vampir Köylü (Mafya) oyunu. 5-12 oyuncu, roller Köylü, Vampir, Doktor, Kâhin ve isteğe bağlı Tuzakçı. Fazlar: Lobi → Gece (25 sn) → Gündüz (75 sn) → Oylama (30 sn) → Bitiş. Faz ilerletme sunucudadır, gizli bilgi role göre filtrelenir, istemci AJAX polling ile güncellenir. Kapsam dışı: oyun içi sohbet, botlar.
+Çok oyunculu, sunucu tabanlı Vampir Köylü (Mafya) oyunu. 5-12 oyuncu, roller Köylü, Vampir, Doktor, Kâhin ve isteğe bağlı Tuzakçı. Fazlar: Lobi → Gece (25 sn) → Gündüz (75 sn) → Oylama (30 sn) → Bitiş. Faz ilerletme sunucudadır, gizli bilgi role göre filtrelenir, istemci AJAX polling ile güncellenir. Oyun içi metin sohbeti kapsamdadır (gece kapalı, FR-20). Kapsam dışı: sesli veya görüntülü sohbet, botlar.
 
 **İçindekiler:** 1 Mimari · 2 Sınıf diyagramı · 3 Sıralama diyagramı · 4 ER diyagramı · 5 Tasarım desenleri · 6 Arayüz · 7 Riskler · 8 Plan
 
@@ -580,7 +580,7 @@ Sayfa haritasındaki şu ekranlar görsel tasarımda yoktur; aynı tema ile çiz
 | R6 | Kazanma veya gece çözümü kuralları sınır durumlarında yanlış sonuç verir | Orta | Yüksek | Çekirdek sınıflar için en az 5 PHPUnit testi; sınır durumları (eşit sayı, sıfır vampir, aynı kişiyi koruma) dahil (NFR-4) |
 | R7 | Oda kodu çakışır | Düşük | Orta | Benzersiz indeks, çakışmada yeniden üretim; 1000 kodluk çakışma testi (NFR-2) |
 | R8 | Zayıf oturum yönetimi veya SQL injection ile hesap ele geçirilir | Düşük | Yüksek | `password_hash`, girişte `session_regenerate_id`, yalnızca PDO prepared statement |
-| R9 | Takım zamanı yetmez, kapsam büyür | Orta | Orta | Önce çekirdek hikayeler (US-3 ~ US-11), sonra hayalet, günlük ve rapor; kapsam dışı: sohbet ve botlar |
+| R9 | Takım zamanı yetmez, kapsam büyür | Orta | Orta | Önce çekirdek hikayeler (US-3 ~ US-11), sonra hayalet, günlük ve rapor; kapsam dışı: botlar (metin sohbeti sonradan kapsama alındı, FR-20) |
 
 ---
 
